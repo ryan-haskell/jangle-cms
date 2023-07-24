@@ -1,0 +1,24 @@
+{
+  "name": "@jangle-cms/app",
+  "version": "1.0.0",
+  "description": "Content's best friend.",
+  "main": "src/Pages/Home_.elm",
+  "scripts": {
+    "start": "npm i && npm run dev",
+    "dev": "elm-land server",
+    "test": "elm-test",
+    "test:watch": "elm-test --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jangle-cms/app.git"
+  },
+  "keywords": [ "jangle", "cms" ],
+  "author": "Ryan Haskell-Glatz",
+  "homepage": "https://jangle.io",
+  "devDependencies": {
+    "elm": "0.19.1-5",
+    "elm-land": "0.19.2",
+    "elm-test": "0.19.1-revision12"
+  }
+}
