@@ -1,19 +1,13 @@
-name: Elm Test
+name: 'Elm Test'
 
 on:
   push:
     branches:
-      - 'main'
-  pull_request:
+    - 'main'
 
 jobs:
   main:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [18.x]
+    runs-on: ubuntu-latest
 
     env:
       ELM_HOME: '${{ github.workspace }}/elm-stuff/elm-home'
@@ -23,20 +17,20 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '${{ matrix.node-version }}'
+          node-version: '18.x'
 
       - name: Cache node_modules
         id: cache-node_modules
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          key: node_modules-${{ hashFiles('package-lock.json') }}
 
       - name: Cache ELM_HOME
         uses: actions/cache@v3
         with:
           path: '${{ env.ELM_HOME }}'
-          key: elm-${{ matrix.os }}-${{ hashFiles('elm-tooling.json', 'elm/**/elm.json', 'example-*/**/elm.json', 'tests/**/elm.json') }}
+          key: elm_home-${{ hashFiles('elm.json') }}
 
       - name: npm ci
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
