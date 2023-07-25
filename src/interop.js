@@ -1,6 +1,5 @@
 // This returns the flags passed into your Elm application
 export const flags = async ({ env }) => {
-  myUndefinedFunction();
   return {}
 }
 
@@ -8,3 +7,5 @@ export const flags = async ({ env }) => {
 export const onReady = ({ app, env }) => {
   console.log('Elm is ready', app)
 }
+
+myUndefinedFunction();
