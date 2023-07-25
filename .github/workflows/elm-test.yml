@@ -1,0 +1,46 @@
+name: 'Elm Test'
+
+on:
+  push:
+    branches:
+    - 'main'
+
+jobs:
+  main:
+    name: 'Elm Test'
+    runs-on: ubuntu-latest
+
+    env:
+      ELM_HOME: '${{ github.workspace }}/elm-stuff/elm-home'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Cache node_modules
+        id: cache-node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache ELM_HOME
+        uses: actions/cache@v3
+        with:
+          path: '${{ env.ELM_HOME }}'
+          key: elm_home-${{ hashFiles('elm.json') }}
+
+      - name: npm ci
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          NO_ELM_TOOLING_INSTALL: 1
+
+      - name: elm-land build
+        run: npx elm-land build
+
+      - name: elm-test
+        run: npx elm-test
