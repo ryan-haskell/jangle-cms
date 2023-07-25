@@ -5,21 +5,31 @@
   "main": "src/Pages/Home_.elm",
   "scripts": {
     "start": "npm i && npm run dev",
+    "build": "elm-land build",
     "dev": "elm-land server",
     "test": "elm-test",
-    "test:watch": "elm-test --watch"
+    "test:watch": "elm-test --watch",
+    "storybook": "storybook dev -s ../static -p 6006",
+    "storybook:build": "storybook build -s static --quiet"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jangle-cms/app.git"
   },
-  "keywords": [ "jangle", "cms" ],
+  "keywords": [
+    "jangle",
+    "cms"
+  ],
   "author": "Ryan Haskell-Glatz",
   "homepage": "https://jangle.io",
   "devDependencies": {
     "elm": "0.19.1-5",
     "elm-land": "0.19.2",
-    "elm-test": "0.19.1-revision12"
+    "elm-test": "0.19.1-revision12",
+    "vite-plugin-elm": "2.8.0",
+    "@storybook/addon-essentials": "7.1.0",
+    "@storybook/html-vite": "7.1.0",
+    "storybook": "7.1.0"
   },
   "dependencies": {
     "@sentry/browser": "7.60.0"
