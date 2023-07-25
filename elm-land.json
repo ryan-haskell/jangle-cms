@@ -4,7 +4,7 @@
       "development": { "debugger": true },
       "production": { "debugger": false }
     },
-    "env": [],
+    "env": ["NODE_ENV", "SENTRY_DSN"],
     "html": {
       "attributes": {
         "html": { "lang": "en" },
@@ -17,12 +17,7 @@
         { "name": "viewport", "content": "width=device-width, initial-scale=1.0" }
       ],
       "link": [],
-      "script": [
-        {
-          "src": "https://js.sentry-cdn.com/136d5d1e284d4f919ed1f4b04e9ecdd8.min.js",
-          "crossorigin": "anonymous"
-        }
-      ]
+      "script": []
     },
     "router": {
       "useHashRouting": false
