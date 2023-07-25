@@ -10,7 +10,7 @@
     "test": "elm-test",
     "test:watch": "elm-test --watch",
     "storybook": "storybook dev -s ../static -p 6006",
-    "storybook:build": "storybook build -s static --quiet"
+    "storybook:build": "storybook build -s static"
   },
   "repository": {
     "type": "git",
@@ -23,13 +23,12 @@
   "author": "Ryan Haskell-Glatz",
   "homepage": "https://jangle.io",
   "devDependencies": {
+    "@storybook/html-vite": "7.1.1",
     "elm": "0.19.1-5",
     "elm-land": "0.19.2",
     "elm-test": "0.19.1-revision12",
-    "vite-plugin-elm": "2.8.0",
-    "@storybook/addon-essentials": "7.1.0",
-    "@storybook/html-vite": "7.1.0",
-    "storybook": "7.1.0"
+    "storybook": "7.1.1",
+    "vite-plugin-elm": "2.9.0-beta.1"
   },
   "dependencies": {
     "@sentry/browser": "7.60.0"
