@@ -51,8 +51,8 @@
   
   --button_secondaryText: var(--color_black);
   --button_secondaryBg: var(--color_white);
-  --button_secondaryBgHover: var(--color_white);
-  --button_secondaryBgActive: var(--color_white);
+  --button_secondaryBgHover: var(--color_gray100);
+  --button_secondaryBgActive: var(--color_gray200);
   --button_secondaryBorder: var(--color_blackBorder);
 }
 
@@ -61,8 +61,6 @@
   :root {
     --color_bg: var(--color_gray900);
     --color_text: var(--color_white);
-    --button_secondaryBgHover: var(--color_gray100);
-    --button_secondaryBgActive: var(--color_gray200);
     --color_textSecondary: var(--color_gray300);
 
     --button_secondaryText: var(--color_white);
