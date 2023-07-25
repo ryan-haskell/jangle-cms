@@ -8,5 +8,5 @@ export const flags = async ({ env }) => {
 
 // This function is called once your Elm app is running
 export const onReady = ({ app, env }) => {
-  console.log('Elm is ready', app)
+
 }

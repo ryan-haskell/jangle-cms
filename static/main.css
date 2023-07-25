@@ -1,0 +1,168 @@
+:root {
+  --color_white: #FFFFFF;
+  --color_gray100: #F4F4F4;
+  --color_gray200: #E5E5E5;
+  --color_gray300: #AAAAAA;
+  --color_gray400: #777777;
+  --color_gray600: #393939;
+  --color_gray700: #202020;
+  --color_gray800: #151515;
+  --color_gray900: #0C0910;
+  --color_black: #000000;
+
+  --color_primary: #E40C6D;
+  --color_primaryHover: #C10B5D;
+  --color_primaryActive: #9A094A;
+
+  --color_blackBorder: #00000040;
+  --color_whiteBorder: #FFFFFF40;
+
+  --family_body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;;
+  --family_header: 'Almarai', var(--family_body);
+
+  --letter_header: -0.05em;
+
+  --weight_400: 400;
+  --weight_600: 600;
+  --weight_800: 800;
+
+  --px_8: 0.5rem;
+  --px_12: 0.75rem;
+  --px_14: 0.875rem;
+  --px_16: 1rem;
+  --px_32: 2rem;
+  --px_48: 3rem;
+
+  --font_title: var(--px_48);
+  --font_h1: var(--px_32);
+  --font_label: var(--px_14);
+  --font_sublabel: var(--px_12);
+  --font_linkGroupLabel: var(--px_12);
+  --font_linkLabel: var(--px_16);
+
+  --duration_100: 100ms;
+}
+
+/* LIGHT MODE */
+:root {
+  --color_bg: var(--color_white);
+  --color_text: var(--color_black);
+  --color_textSecondary: var(--color_gray400);
+  
+  --button_secondaryText: var(--color_black);
+  --button_secondaryBg: var(--color_white);
+  --button_secondaryBgHover: var(--color_white);
+  --button_secondaryBgActive: var(--color_white);
+  --button_secondaryBorder: var(--color_blackBorder);
+}
+
+/* DARK MODE */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color_bg: var(--color_gray900);
+    --color_text: var(--color_white);
+    --button_secondaryBgHover: var(--color_gray100);
+    --button_secondaryBgActive: var(--color_gray200);
+    --color_textSecondary: var(--color_gray300);
+
+    --button_secondaryText: var(--color_white);
+    --button_secondaryBg: var(--color_black);
+    --button_secondaryBgHover: var(--color_gray700);
+    --button_secondaryBgActive: var(--color_gray600);
+    --button_secondaryBorder: var(--color_whiteBorder);
+  }
+}
+
+/* RESETS */
+html {
+  height: 100%;
+  color: var(--color_text);
+  background-color: var(--color_bg);
+}
+
+body {
+  height: 100%;
+  font-family: var(--family_body);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/* LAYOUT */
+.row {
+  display: flex;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.row:where(.align_left) { justify-content: flex-start; }
+.col:where(.align_left) { align-items: flex-start; }
+
+.gap_8 { gap: var(--px_8); }
+.gap_12 { gap: var(--px_12); }
+.gap_16 { gap: var(--px_16); }
+.gap_32 { gap: var(--px_32); }
+.gap_48 { gap: var(--px_48); }
+
+.pad_8 { padding: var(--px_8); }
+.pad_12 { padding: var(--px_12); }
+.pad_16 { padding: var(--px_16); }
+.pad_32 { padding: var(--px_32); }
+.pad_48 { padding: var(--px_48); }
+
+/* TYPOGRAPHY */
+.text_title {
+  text-rendering: geometricPrecision;
+  font-size: var(--font_title);
+  font-family: var(--family_header);
+  font-weight: var(--weight_800);
+  letter-spacing: var(--letter_header);
+}
+.text_h1 {
+  text-rendering: geometricPrecision;
+  font-size: var(--font_h1);
+  font-family: var(--family_header);
+  font-weight: var(--weight_800);
+  letter-spacing: var(--letter_header);
+}
+
+/* BUTTON */
+.button {
+  display: inline-flex;
+  gap: var(--px_8);
+  cursor: pointer;
+  transition: background-color var(--duration_100) ease-in-out;
+  font-size: var(--font_label);
+  font-weight: var(--weight_600);
+  color: var(--color_white);
+  background-color: var(--color_primary);
+  border-radius: var(--px_8);
+  padding: var(--px_12) var(--px_16);
+}
+
+.button:hover {
+  background-color: var(--color_primaryHover);
+}
+
+.button:active {
+  background-color: var(--color_primaryActive);
+}
+
+.button--secondary {
+  color: var(--button_secondaryText);
+  background-color: var(--button_secondaryBg);
+  border: solid 1px var(--button_secondaryBorder);
+}
+
+.button--secondary:hover { background-color: var(--button_secondaryBgHover); }
+.button--secondary:active { background-color: var(--button_secondaryBgActive); }
