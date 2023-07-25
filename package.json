@@ -10,7 +10,7 @@
     "test": "elm-test",
     "test:watch": "elm-test --watch",
     "storybook": "storybook dev -s ../static -p 6006",
-    "storybook:build": "storybook build -s static"
+    "storybook:build": "npm run build && storybook build -s static"
   },
   "repository": {
     "type": "git",
