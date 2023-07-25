@@ -7,5 +7,3 @@ export const flags = async ({ env }) => {
 export const onReady = ({ app, env }) => {
   console.log('Elm is ready', app)
 }
-
-myUndefinedFunction();
