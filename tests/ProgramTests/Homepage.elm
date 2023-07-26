@@ -3,6 +3,7 @@ module ProgramTests.Homepage exposing (..)
 import Effect exposing (Effect)
 import Pages.Home_ exposing (Model, Msg)
 import ProgramTest exposing (..)
+import Route.Path
 import Test exposing (..)
 import Test.Html.Selector exposing (text)
 
@@ -16,7 +17,7 @@ start =
     ProgramTest.createDocument
         { init = Pages.Home_.init
         , update = Pages.Home_.update
-        , view = Pages.Home_.view
+        , view = Pages.Home_.view Route.Path.Home_
         }
         |> ProgramTest.start ()
 

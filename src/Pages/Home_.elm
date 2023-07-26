@@ -10,6 +10,7 @@ import Html.Attributes exposing (..)
 import Html.Events
 import Page exposing (Page)
 import Route exposing (Route)
+import Route.Path exposing (Path)
 import Shared
 import View exposing (View)
 
@@ -20,7 +21,7 @@ page shared route =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view route
+        , view = view route.path
         }
 
 
@@ -76,8 +77,8 @@ subscriptions model =
 -- VIEW
 
 
-view : Route () -> Model -> View Msg
-view route model =
+view : Path -> Model -> View Msg
+view path model =
     { title = "Homepage"
     , body =
         [ Components.Layout.new
@@ -97,7 +98,7 @@ view route model =
             }
             |> Components.Layout.withHeader { title = "Dashboard" }
             |> Components.Layout.withSidebar
-                { current = route.path
+                { current = path
                 , user = { name = "Ryan Kelch", image = Just "https://media.licdn.com/dms/image/C5603AQEFyiIUdnt6xw/profile-displayphoto-shrink_200_200/0/1517588993682?e=1694649600&v=beta&t=ctfenv41CpIWdP_iAHui5vtMGNkWBfSSuPMqxS_q3E0" }
                 , project = { id = "portfolio", name = "Portfolio Site" }
                 , contentLinks =
