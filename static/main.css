@@ -32,6 +32,7 @@
   --px_16: 1rem;
   --px_32: 2rem;
   --px_48: 3rem;
+  --px_96: 6rem;
 
   --font_title: var(--px_48);
   --font_h1: var(--px_32);
@@ -45,7 +46,8 @@
 
 /* LIGHT MODE */
 :root {
-  --color_bg: var(--color_white);
+  --color_background: var(--color_white);
+  --color_border: var(--color_blackBorder);
   --color_text: var(--color_black);
   --color_textSecondary: var(--color_gray400);
   
@@ -59,7 +61,8 @@
 /* DARK MODE */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color_bg: var(--color_gray900);
+    --color_background: var(--color_gray900);
+    --color_border: var(--color_whiteBorder);
     --color_text: var(--color_white);
     --color_textSecondary: var(--color_gray300);
 
@@ -75,7 +78,7 @@
 html {
   height: 100%;
   color: var(--color_text);
-  background-color: var(--color_bg);
+  background-color: var(--color_background);
 }
 
 body {
@@ -105,6 +108,17 @@ body {
 
 .row.align_left { justify-content: flex-start; }
 .col.align_left { align-items: flex-start; }
+.row.align_cx { justify-content: center; }
+.col.align_cx { align-items: center; }
+.row.align_right { justify-content: flex-end; }
+.col.align_right { align-items: flex-end; }
+
+.row.align_top { align-items: flex-start; }
+.col.align_top { justify-content: flex-start; }
+.row.align_cy { align-items: center; }
+.col.align_cy { justify-content: center; }
+.row.align_bottom { align-items: flex-end; }
+.col.align_bottom { justify-content: flex-end; }
 
 .align_center { justify-content: center; align-items: center; }
 
@@ -120,8 +134,20 @@ body {
 .pad_32 { padding: var(--px_32); }
 .pad_48 { padding: var(--px_48); }
 
+.padX_8 { padding-left: var(--px_8); padding-right: var(--px_8); }
+.padX_12 { padding-left: var(--px_12); padding-right: var(--px_12); }
+.padX_16 { padding-left: var(--px_16); padding-right: var(--px_16); }
+.padX_32 { padding-left: var(--px_32); padding-right: var(--px_32); }
+.padX_48 { padding-left: var(--px_48); padding-right: var(--px_48); }
+
 .w_32 { width: var(--px_32); }
 .h_32 { height: var(--px_32); }
+.h_96 { height: var(--px_96); }
+
+/* BORDERS */
+.borderBottom {
+  border-bottom: solid 1px var(--color_border);
+}
 
 .radius_circle { border-radius: 9999px; }
 
@@ -139,6 +165,7 @@ body {
 /* COLORS */
 
 .bg_gray200 { background-color: var(--color_gray200); }
+.bg_background { background-color: var(--color_background); }
 .bg_image { background-position: center; background-size: cover; background-repeat: no-repeat; }
 
 .color_textSecondary { color: var(--color_textSecondary); }
