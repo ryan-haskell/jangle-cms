@@ -1,5 +1,6 @@
 import { Elm } from './Icon.elm'
 import { render } from '../../.storybook/render'
+import icons from './icons'
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/html/writing-stories/introduction
 export default {
@@ -11,7 +12,7 @@ export default {
   argTypes: {
     icon: {
       control: 'select',
-      options: ['GitHub', 'Google', 'Menu', 'Home', 'Edit', 'Page']
+      options: icons
     },
     size: {
       control: 'select',

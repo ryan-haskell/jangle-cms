@@ -1,4 +1,4 @@
-module Stories.Icon exposing (main)
+module Stories.Icon exposing (iconOptions, main)
 
 import Components.Icon exposing (Icon)
 import Html exposing (Html)
@@ -13,19 +13,23 @@ type alias Controls =
     }
 
 
+iconOptions : List ( String, Icon )
+iconOptions =
+    [ ( "GitHub", Components.Icon.GitHub )
+    , ( "Google", Components.Icon.Google )
+    , ( "Home", Components.Icon.Home )
+    , ( "Menu", Components.Icon.Menu )
+    , ( "Edit", Components.Icon.Edit )
+    , ( "Page", Components.Icon.Page )
+    ]
+
+
 decoder : Storybook.Controls.Decoder Controls
 decoder =
     Storybook.Controls.new Controls
         |> Storybook.Controls.withSelect
             { id = "icon"
-            , options =
-                [ ( "GitHub", Components.Icon.GitHub )
-                , ( "Google", Components.Icon.Google )
-                , ( "Home", Components.Icon.Home )
-                , ( "Menu", Components.Icon.Menu )
-                , ( "Edit", Components.Icon.Edit )
-                , ( "Page", Components.Icon.Page )
-                ]
+            , options = iconOptions
             }
         |> Storybook.Controls.withSelect
             { id = "size"

@@ -30,6 +30,7 @@
   --px_12: 0.75rem;
   --px_14: 0.875rem;
   --px_16: 1rem;
+  --px_24: 1.5rem;
   --px_32: 2rem;
   --px_48: 3rem;
   --px_96: 6rem;
@@ -56,6 +57,11 @@
   --button_secondaryBgHover: var(--color_gray100);
   --button_secondaryBgActive: var(--color_gray200);
   --button_secondaryBorder: var(--color_blackBorder);
+
+  --sidebarLink_bg: var(--color_gray100);
+  --sidebarLink_hoverBg: var(--color_white);
+  --sidebarLink_activeBg: var(--color_white);
+  --sidebarLink_selectedBg: var(--color_white);
 }
 
 /* DARK MODE */
@@ -71,6 +77,11 @@
     --button_secondaryBgHover: var(--color_gray700);
     --button_secondaryBgActive: var(--color_gray600);
     --button_secondaryBorder: var(--color_whiteBorder);
+
+    --sidebarLink_bg: var(--color_black);
+    --sidebarLink_hoverBg: var(--color_gray700);
+    --sidebarLink_activeBg: var(--color_gray700);
+    --sidebarLink_selectedBg: var(--color_gray700);
   }
 }
 
@@ -125,20 +136,44 @@ body {
 .gap_8 { gap: var(--px_8); }
 .gap_12 { gap: var(--px_12); }
 .gap_16 { gap: var(--px_16); }
+.gap_24 { gap: var(--px_24); }
 .gap_32 { gap: var(--px_32); }
 .gap_48 { gap: var(--px_48); }
 
 .pad_8 { padding: var(--px_8); }
 .pad_12 { padding: var(--px_12); }
 .pad_16 { padding: var(--px_16); }
+.pad_24 { padding: var(--px_24); }
 .pad_32 { padding: var(--px_32); }
 .pad_48 { padding: var(--px_48); }
 
 .padX_8 { padding-left: var(--px_8); padding-right: var(--px_8); }
 .padX_12 { padding-left: var(--px_12); padding-right: var(--px_12); }
 .padX_16 { padding-left: var(--px_16); padding-right: var(--px_16); }
+.padX_24 { padding-left: var(--px_24); padding-right: var(--px_24); }
 .padX_32 { padding-left: var(--px_32); padding-right: var(--px_32); }
 .padX_48 { padding-left: var(--px_48); padding-right: var(--px_48); }
+
+.padY_8 { padding-top: var(--px_8); padding-bottom: var(--px_8); }
+.padY_12 { padding-top: var(--px_12); padding-bottom: var(--px_12); }
+.padY_16 { padding-top: var(--px_16); padding-bottom: var(--px_16); }
+.padY_24 { padding-top: var(--px_24); padding-bottom: var(--px_24); }
+.padY_32 { padding-top: var(--px_32); padding-bottom: var(--px_32); }
+.padY_48 { padding-top: var(--px_48); padding-bottom: var(--px_48); }
+
+.padLeft_8 { padding-left: var(--px_8); }
+.padLeft_12 { padding-left: var(--px_12); }
+.padLeft_16 { padding-left: var(--px_16); }
+.padLeft_24 { padding-left: var(--px_24); }
+.padLeft_32 { padding-left: var(--px_32); }
+.padLeft_48 { padding-left: var(--px_48); }
+
+.padRight_8 { padding-right: var(--px_8); }
+.padRight_12 { padding-right: var(--px_12); }
+.padRight_16 { padding-right: var(--px_16); }
+.padRight_24 { padding-right: var(--px_24); }
+.padRight_32 { padding-right: var(--px_32); }
+.padRight_48 { padding-right: var(--px_48); }
 
 .w_32 { width: var(--px_32); }
 .h_32 { height: var(--px_32); }
@@ -195,6 +230,16 @@ body {
   font-family: var(--family_body);
   font-weight: var(--weight_400);
 }
+.font_linkGroupLabel {
+  font-size: var(--font_linkGroupLabel);
+  font-family: var(--family_body);
+  font-weight: var(--weight_600);
+}
+.font_linkLabel {
+  font-size: var(--font_linkLabel);
+  font-family: var(--family_body);
+  font-weight: var(--weight_400);
+}
 
 /* BUTTON */
 .button {
@@ -213,7 +258,6 @@ body {
 .button:hover {
   background-color: var(--color_primaryHover);
 }
-
 .button:active {
   background-color: var(--color_primaryActive);
 }
@@ -223,6 +267,32 @@ body {
   background-color: var(--button_secondaryBg);
   border: solid 1px var(--button_secondaryBorder);
 }
+.button--secondary:hover { 
+  background-color: var(--button_secondaryBgHover); 
+}
+.button--secondary:active { 
+  background-color: var(--button_secondaryBgActive); 
+}
 
-.button--secondary:hover { background-color: var(--button_secondaryBgHover); }
-.button--secondary:active { background-color: var(--button_secondaryBgActive); }
+/* SIDEBAR LINK */
+.sidebar_link {
+  cursor: pointer;
+  transition: background-color var(--duration_100) ease-in-out;
+
+  border-top: solid 1px transparent;
+  border-bottom: solid 1px transparent;
+  border-left: solid 8px transparent;
+  background-color: var(--sidebarLink_bg);
+}
+.sidebar_link:hover {
+  background-color: var(--sidebarLink_hoverBg);
+}
+.sidebar_link:active {
+  background-color: var(--sidebarLink_activeBg);
+}
+.sidebar_link--selected {
+  border-left-color: var(--color_primary);
+  border-top-color: var(--color_border);
+  border-bottom-color: var(--color_border);
+  background-color: var(--sidebarLink_selectedBg);
+}
