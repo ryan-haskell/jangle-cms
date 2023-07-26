@@ -11,7 +11,7 @@ export const init = ({ env }) => {
     integrations: [new Sentry.BrowserTracing()],
     tracesSampleRate: 1.0,
     environment:
-      (env.NODE_ENV === 'production')
+      (env.SENTRY_ENV === 'production')
         ? 'production'
         : 'development'
   });

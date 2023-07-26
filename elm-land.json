@@ -4,7 +4,7 @@
       "development": { "debugger": true },
       "production": { "debugger": false }
     },
-    "env": ["NODE_ENV", "SENTRY_DSN"],
+    "env": ["SENTRY_ENV", "SENTRY_DSN"],
     "html": {
       "attributes": {
         "html": { "lang": "en" },
