@@ -34,6 +34,7 @@
     "@storybook/addon-controls": "7.1.1",
     "@storybook/addon-viewport": "7.1.1",
     "@storybook/html-vite": "7.1.1",
+    "@storybook/theming": "7.1.1",
     "concurrently": "8.2.0",
     "elm": "0.19.1-5",
     "elm-land": "0.19.2",
