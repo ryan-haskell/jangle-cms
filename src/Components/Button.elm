@@ -96,7 +96,7 @@ view (Button props) =
             Css.button__secondary
 
           else
-            Css.none
+            Attr.classList []
         ]
         [ case props.icon of
             Just icon ->

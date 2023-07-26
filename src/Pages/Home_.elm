@@ -1,5 +1,7 @@
 module Pages.Home_ exposing (..)
 
+import Components.Button
+import Css
 import Effect exposing (Effect)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -76,11 +78,16 @@ view : Model -> View Msg
 view model =
     { title = "Homepage"
     , body =
-        [ div [ class "col gap_16 pad_32 align_left" ]
-            [ h1 [ class "text_h1" ] [ text ("Counter: " ++ String.fromInt model.counter) ]
-            , div [ class "row gap_8" ]
-                [ button [ class "button", Html.Events.onClick Increment ] [ text "Increment" ]
-                , button [ class "button button--secondary", Html.Events.onClick Decrement ] [ text "Decrement" ]
+        [ div [ Css.col, Css.pad_32, Css.gap_16, Css.align_left ]
+            [ h1 [ Css.font_h1 ] [ text ("Counter: " ++ String.fromInt model.counter) ]
+            , div [ Css.row, Css.gap_8 ]
+                [ Components.Button.new { label = "Increment" }
+                    |> Components.Button.withOnClick Increment
+                    |> Components.Button.view
+                , Components.Button.new { label = "Decrement" }
+                    |> Components.Button.withStyleSecondary
+                    |> Components.Button.withOnClick Decrement
+                    |> Components.Button.view
                 ]
             ]
         ]
