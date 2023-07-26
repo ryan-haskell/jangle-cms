@@ -39,8 +39,8 @@ jobs:
         env:
           NO_ELM_TOOLING_INSTALL: 1
 
-      - name: elm-land build
-        run: npx elm-land build
+      - name: npm run build
+        run: npm run build
 
-      - name: elm-test
-        run: npx elm-test
+      - name: npm run test
+        run: npm run test
