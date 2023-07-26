@@ -75,6 +75,9 @@ view (SidebarLink props) =
             Attr.classList []
         ]
         [ Components.Icon.view16 props.icon
-        , span [ Css.font_linkLabel ]
+        , span
+            [ Css.font_linkLabel
+            , Css.ellipsis
+            ]
             [ text props.label ]
         ]

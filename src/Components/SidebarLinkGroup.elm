@@ -18,6 +18,7 @@ view props =
             , Css.font_linkGroupLabel
             , Css.color_textSecondary
             , Css.uppercase
+            , Css.ellipsis
             ]
             [ text props.title ]
         , div [ Css.col ] (List.map Components.SidebarLink.view props.links)
