@@ -206,6 +206,7 @@ body {
 .color_textSecondary { color: var(--color_textSecondary); }
 
 /* TYPOGRAPHY */
+
 .font_title {
   text-rendering: geometricPrecision;
   font-size: var(--font_title);
@@ -240,6 +241,8 @@ body {
   font-family: var(--family_body);
   font-weight: var(--weight_400);
 }
+
+.uppercase { text-transform: uppercase; }
 
 /* BUTTON */
 .button {
@@ -282,7 +285,6 @@ body {
   border-top: solid 1px transparent;
   border-bottom: solid 1px transparent;
   border-left: solid 8px transparent;
-  background-color: var(--sidebarLink_bg);
 }
 .sidebar_link:hover {
   background-color: var(--sidebarLink_hoverBg);
