@@ -1,6 +1,8 @@
 module Pages.Home_ exposing (..)
 
 import Components.Button
+import Components.Icon
+import Components.Layout
 import Css
 import Effect exposing (Effect)
 import Html exposing (..)
@@ -18,7 +20,7 @@ page shared route =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = view route
         }
 
 
@@ -74,21 +76,41 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
+view : Route () -> Model -> View Msg
+view route model =
     { title = "Homepage"
     , body =
-        [ div [ Css.col, Css.pad_32, Css.gap_16, Css.align_left ]
-            [ h1 [ Css.font_h1 ] [ text ("Counter: " ++ String.fromInt model.counter) ]
-            , div [ Css.row, Css.gap_8 ]
-                [ Components.Button.new { label = "Increment" }
-                    |> Components.Button.withOnClick Increment
-                    |> Components.Button.view
-                , Components.Button.new { label = "Decrement" }
-                    |> Components.Button.withStyleSecondary
-                    |> Components.Button.withOnClick Decrement
-                    |> Components.Button.view
-                ]
-            ]
+        [ Components.Layout.new
+            { content =
+                div [ Css.col, Css.pad_32, Css.gap_16, Css.align_left ]
+                    [ h1 [ Css.font_h1 ] [ text ("Counter: " ++ String.fromInt model.counter) ]
+                    , div [ Css.row, Css.gap_8 ]
+                        [ Components.Button.new { label = "Increment" }
+                            |> Components.Button.withOnClick Increment
+                            |> Components.Button.view
+                        , Components.Button.new { label = "Decrement" }
+                            |> Components.Button.withStyleSecondary
+                            |> Components.Button.withOnClick Decrement
+                            |> Components.Button.view
+                        ]
+                    ]
+            }
+            |> Components.Layout.withHeader { title = "Dashboard" }
+            |> Components.Layout.withSidebar
+                { current = route.path
+                , user = { name = "Ryan Kelch", image = Just "https://media.licdn.com/dms/image/C5603AQEFyiIUdnt6xw/profile-displayphoto-shrink_200_200/0/1517588993682?e=1694649600&v=beta&t=ctfenv41CpIWdP_iAHui5vtMGNkWBfSSuPMqxS_q3E0" }
+                , project = { id = "portfolio", name = "Portfolio Site" }
+                , contentLinks =
+                    [ { typeId = "blog-posts"
+                      , icon = Components.Icon.Edit
+                      , label = "Blog posts"
+                      }
+                    , { typeId = "contact-info"
+                      , icon = Components.Icon.Page
+                      , label = "Contact Info"
+                      }
+                    ]
+                }
+            |> Components.Layout.view
         ]
     }

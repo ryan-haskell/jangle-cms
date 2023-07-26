@@ -57,16 +57,20 @@ view props =
 
         viewContentLink : ContentLink -> SidebarLink
         viewContentLink link =
+            let
+                routePath : Path
+                routePath =
+                    Route.Path.Projects_ProjectId__Content_TypeId_
+                        { projectId = props.project.id
+                        , typeId = link.typeId
+                        }
+            in
             Components.SidebarLink.new
                 { icon = link.icon
                 , label = link.label
                 }
-                |> Components.SidebarLink.withRoutePath
-                    (Route.Path.Projects_ProjectId__Content_TypeId_
-                        { projectId = props.project.id
-                        , typeId = link.typeId
-                        }
-                    )
+                |> Components.SidebarLink.withRoutePath routePath
+                |> Components.SidebarLink.withSelectedStyle (routePath == props.current)
     in
     aside
         [ Css.col

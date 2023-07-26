@@ -1,6 +1,6 @@
 import { Elm } from './SidebarLink.elm'
 import { render } from '../../.storybook/render'
-import icons from './icons'
+import { icons } from './icons'
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/html/writing-stories/introduction
 export default {
