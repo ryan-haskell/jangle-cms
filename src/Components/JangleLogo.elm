@@ -11,7 +11,7 @@ import Svg.Attributes as Attr
 
 viewSmall : Html msg
 viewSmall =
-    Html.div [ Css.row, Css.align_center, Css.gap_8 ]
+    Html.div [ Css.row, Css.gap_8, Css.align_center ]
         [ viewJangleLogoSmall
         , Html.span [ Css.font_h1 ] [ text "Jangle" ]
         ]
@@ -19,7 +19,7 @@ viewSmall =
 
 viewLarge : Html msg
 viewLarge =
-    Html.div [ Css.row, Css.align_center, Css.gap_12 ]
+    Html.div [ Css.row, Css.gap_12, Css.align_center ]
         [ viewJangleLogoLarge
         , Html.span [ Css.font_title ] [ text "Jangle" ]
         ]
