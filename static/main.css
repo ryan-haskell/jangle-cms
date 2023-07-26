@@ -190,6 +190,12 @@ body {
 .shrink { flex-shrink: 1; }
 .scroll { overflow: auto; }
 
+.content-box { box-sizing: content-box; }
+
+/* LAYERS */
+.sticky { position: sticky; top: 0; left: 0; }
+.z1 { z-index: 1; }
+
 /* BORDERS */
 .borderBottom {
   border-bottom: solid 1px var(--color_border);

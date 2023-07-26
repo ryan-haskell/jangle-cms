@@ -29,6 +29,7 @@ view :
     -> Html msg
 view props =
     let
+        viewHeaderBrand : Html msg
         viewHeaderBrand =
             div
                 [ Css.row
@@ -38,6 +39,7 @@ view props =
                 ]
                 [ Components.JangleLogo.viewSmall ]
 
+        viewTopLinks : Html msg
         viewTopLinks =
             div [ Css.col, Css.gap_16, Css.scroll ]
                 [ Components.SidebarLink.new
