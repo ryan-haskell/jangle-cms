@@ -3,6 +3,7 @@ module Components.Button exposing
     , view
     , withOnClick, withHref
     , withStyleSecondary
+    , withIcon
     )
 
 {-|
@@ -15,6 +16,8 @@ module Components.Button exposing
 
 -}
 
+import Components.Icon exposing (Icon)
+import Css
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events
@@ -29,6 +32,7 @@ type Button msg
         { label : String
         , onClick : Maybe (Action msg)
         , style : Style
+        , icon : Maybe Icon
         }
 
 
@@ -52,6 +56,7 @@ new props =
         { label = props.label
         , onClick = Nothing
         , style = Primary
+        , icon = Nothing
         }
 
 
@@ -74,6 +79,11 @@ withHref url (Button props) =
     Button { props | onClick = Just (OpenUrl url) }
 
 
+withIcon : Icon -> Button msg -> Button msg
+withIcon icon (Button props) =
+    Button { props | icon = Just icon }
+
+
 
 -- VIEW
 
@@ -81,12 +91,20 @@ withHref url (Button props) =
 view : Button msg -> Html msg
 view (Button props) =
     viewElement props.onClick
-        [ Attr.class "button"
-        , Attr.classList
-            [ ( "button--secondary", props.style == Secondary )
-            ]
+        [ Css.button
+        , if props.style == Secondary then
+            Css.button__secondary
+
+          else
+            Css.none
         ]
-        [ Html.text props.label
+        [ case props.icon of
+            Just icon ->
+                Components.Icon.view16 icon
+
+            Nothing ->
+                Html.text ""
+        , Html.span [] [ Html.text props.label ]
         ]
 
 
@@ -95,7 +113,15 @@ viewElement :
     -> List (Html.Attribute msg)
     -> List (Html msg)
     -> Html msg
-viewElement maybeAction attributes children =
+viewElement maybeAction attributes_ children =
+    let
+        attributes : List (Html.Attribute msg)
+        attributes =
+            Css.row
+                :: Css.gap_8
+                :: Css.align_center
+                :: attributes_
+    in
     case maybeAction of
         Just (OpenUrl url) ->
             Html.a

@@ -11,19 +11,31 @@ export default {
   argTypes: {
     label: { control: 'text' },
     primary: { control: 'boolean' },
+    icon: { control: 'boolean' },
   },
 }
 
 // More on writing stories with args: https://storybook.js.org/docs/7.0/html/writing-stories/args
 export const Primary = {
   args: {
+    icon: false,
     primary: true,
-    label: 'Create post',
+    label: 'New project',
   },
 }
 
 export const Secondary = {
   args: {
+    icon: false,
+    primary: false,
     label: 'Cancel',
   },
+}
+
+export const WithIcon = {
+  args: {
+    icon: true,
+    primary: false,
+    label: 'Sign in with GitHub'
+  }
 }

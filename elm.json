@@ -11,6 +11,7 @@
             "elm/core": "1.0.5",
             "elm/html": "1.0.0",
             "elm/json": "1.1.3",
+            "elm/svg": "1.0.1",
             "elm/url": "1.0.0"
         },
         "indirect": {
@@ -20,8 +21,8 @@
     },
     "test-dependencies": {
         "direct": {
-            "elm-explorations/test": "2.1.1",
-            "avh4/elm-program-test": "4.0.0"
+            "avh4/elm-program-test": "4.0.0",
+            "elm-explorations/test": "2.1.1"
         },
         "indirect": {
             "avh4/elm-fifo": "1.0.4",

@@ -103,8 +103,10 @@ body {
   flex-direction: column;
 }
 
-.row:where(.align_left) { justify-content: flex-start; }
-.col:where(.align_left) { align-items: flex-start; }
+.row.align_left { justify-content: flex-start; }
+.col.align_left { align-items: flex-start; }
+
+.align_center { justify-content: center; align-items: center; }
 
 .gap_8 { gap: var(--px_8); }
 .gap_12 { gap: var(--px_12); }
@@ -164,3 +166,5 @@ body {
 
 .button--secondary:hover { background-color: var(--button_secondaryBgHover); }
 .button--secondary:active { background-color: var(--button_secondaryBgActive); }
+
+.none {}

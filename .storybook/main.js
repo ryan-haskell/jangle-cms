@@ -8,6 +8,12 @@ export default {
     name: "@storybook/html-vite",
     options: {}
   },
+  addons: [
+    "@storybook/addon-controls",
+    "@storybook/addon-a11y",
+    "@storybook/addon-actions",
+    "@storybook/addon-viewport",
+  ],
   async viteFinal(config) {
     return {
       ...config,
