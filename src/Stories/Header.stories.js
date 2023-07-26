@@ -6,7 +6,7 @@ export default {
   title: 'Components/Header',
   render: render(Elm.Stories.Header),
   parameters: {
-    layout: 'full'
+    layout: 'fullscreen'
   },
   argTypes: {
     title: { control: 'text' },

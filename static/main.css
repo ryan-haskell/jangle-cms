@@ -34,6 +34,7 @@
   --px_32: 2rem;
   --px_48: 3rem;
   --px_96: 6rem;
+  --px_240: 15rem;
 
   --font_title: var(--px_48);
   --font_h1: var(--px_32);
@@ -48,6 +49,7 @@
 /* LIGHT MODE */
 :root {
   --color_background: var(--color_white);
+  --color_navbarBackground: var(--color_gray100);
   --color_border: var(--color_blackBorder);
   --color_text: var(--color_black);
   --color_textSecondary: var(--color_gray400);
@@ -68,6 +70,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color_background: var(--color_gray900);
+    --color_navbarBackground: var(--color_black);
+
     --color_border: var(--color_whiteBorder);
     --color_text: var(--color_white);
     --color_textSecondary: var(--color_gray300);
@@ -176,12 +180,22 @@ body {
 .padRight_48 { padding-right: var(--px_48); }
 
 .w_32 { width: var(--px_32); }
+.w_240 { width: var(--px_240);}
+
 .h_32 { height: var(--px_32); }
 .h_96 { height: var(--px_96); }
+.h_fill { height: 100%; }
+
+.fill { flex-grow: 1; }
+.shrink { flex-shrink: 1; }
+.scroll { overflow: auto; }
 
 /* BORDERS */
 .borderBottom {
   border-bottom: solid 1px var(--color_border);
+}
+.borderRight {
+  border-right: solid 1px var(--color_border);
 }
 
 .radius_circle { border-radius: 9999px; }
@@ -200,6 +214,9 @@ body {
 /* COLORS */
 
 .bg_gray200 { background-color: var(--color_gray200); }
+
+
+.bg_navbar { background-color: var(--color_navbarBackground); }
 .bg_background { background-color: var(--color_background); }
 .bg_image { background-position: center; background-size: cover; background-repeat: no-repeat; }
 

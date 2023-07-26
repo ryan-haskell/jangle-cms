@@ -1,21 +1,17 @@
-import { Elm } from './SidebarLinkGroup.elm'
+import { Elm } from './Sidebar.elm'
 import { render } from '../../.storybook/render'
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/html/writing-stories/introduction
 export default {
-  title: 'Components/SidebarLinkGroup',
-  render: render(Elm.Stories.SidebarLinkGroup),
+  title: 'Components/Sidebar',
+  render: render(Elm.Stories.Sidebar),
   parameters: {
-    layout: 'centered'
+    layout: 'fullscreen'
   },
-  argTypes: {
-    label: { control: 'text' },
-  },
+  argTypes: {},
 }
 
 // More on writing stories with args: https://storybook.js.org/docs/7.0/html/writing-stories/args
-export const SidebarLinkGroup = {
-  args: {
-    label: 'Content'
-  },
+export const Sidebar = {
+  args: {},
 }

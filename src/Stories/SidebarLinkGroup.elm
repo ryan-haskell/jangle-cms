@@ -13,11 +13,6 @@ type alias Controls =
     }
 
 
-type State
-    = Default
-    | Selected
-
-
 decoder : Storybook.Controls.Decoder Controls
 decoder =
     Storybook.Controls.new Controls
