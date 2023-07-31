@@ -79,9 +79,12 @@ subscriptions model =
 -- VIEW
 
 
-view : Route any -> Model -> View Msg
+view :
+    Route { projectId : String, typeId : String }
+    -> Model
+    -> View Msg
 view route model =
-    { title = "Pages.Projects.ProjectId_.Content.TypeId_"
+    { title = "Jangle | " ++ route.params.typeId
     , body =
         [ div [ Css.col, Css.pad_32, Css.gap_16, Css.align_left ]
             [ text "Hello from the content page!"

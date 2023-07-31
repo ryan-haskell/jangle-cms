@@ -1,9 +1,13 @@
 module Pages.SignIn exposing (Model, Msg, page)
 
+import Components.Button
+import Components.Icon
+import Components.JangleLogo
+import Css
 import Effect exposing (Effect)
-import Route exposing (Route)
-import Html
+import Html exposing (..)
 import Page exposing (Page)
+import Route exposing (Route)
 import Shared
 import View exposing (View)
 
@@ -14,7 +18,7 @@ page shared route =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = view shared
         }
 
 
@@ -38,13 +42,13 @@ init () =
 
 
 type Msg
-    = ExampleMsgReplaceMe
+    = UserClickedSignIn
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        ExampleMsgReplaceMe ->
+        UserClickedSignIn ->
             ( model
             , Effect.none
             )
@@ -63,8 +67,22 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> View Msg
-view model =
-    { title = "Pages.SignIn"
-    , body = [ Html.text "/sign-in" ]
+view : Shared.Model -> Model -> View Msg
+view shared model =
+    let
+        gitHubOAuthUrl : String
+        gitHubOAuthUrl =
+            shared.supabase.url ++ "/auth/v1/authorize?provider=github"
+    in
+    { title = "Jangle | Sign in"
+    , body =
+        [ div [ Css.h_fill, Css.col, Css.align_center, Css.gap_16 ]
+            [ Components.JangleLogo.viewLarge
+            , Components.Button.new { label = "Sign in with GitHub" }
+                |> Components.Button.withStyleSecondary
+                |> Components.Button.withIcon Components.Icon.GitHub
+                |> Components.Button.withHref gitHubOAuthUrl
+                |> Components.Button.view
+            ]
+        ]
     }

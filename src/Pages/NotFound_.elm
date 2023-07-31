@@ -1,5 +1,6 @@
 module Pages.NotFound_ exposing (Model, Msg, page)
 
+import Css
 import Effect exposing (Effect)
 import Html exposing (..)
 import Page exposing (Page)
@@ -66,4 +67,10 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    View.fromString "Page not found"
+    { title = "Jangle | 404"
+    , body =
+        [ div [ Css.row, Css.h_fill, Css.align_center ]
+            [ text "Page not found"
+            ]
+        ]
+    }

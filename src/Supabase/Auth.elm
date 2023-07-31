@@ -1,17 +1,23 @@
-module Supabase.Auth exposing (signInWithOAuth)
+module Supabase.Auth exposing
+    ( User, getUserData
+    , GitHubUserMetadata
+    )
 
+{-|
+
+
+## Fetch user data
+
+@docs User, getUserData
+@docs GitHubUserMetadata
+
+-}
+
+import Dict exposing (Dict)
 import Http
 import Json.Decode
 import Json.Encode
-
-
-type Context
-    = Context
-        { url : String
-        , apiKey : String
-        , timeout : Maybe Float
-        , tracker : Maybe String
-        }
+import Supabase.Context exposing (Context)
 
 
 {-| Options when signing in via OAuth:
@@ -28,6 +34,61 @@ type alias SignInWithOAuthOptions =
     , scopes : List String
     , skipBrowserRedirect : Maybe Bool
     }
+
+
+
+-- GET USER DATA
+
+
+type alias User =
+    { id : String
+    , email : String
+    , github : Maybe GitHubUserMetadata
+    }
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map3 User
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
+        (Json.Decode.maybe (Json.Decode.field "user_metadata" githubUserMetadataDecoder))
+
+
+type alias GitHubUserMetadata =
+    { id : String
+    , username : String
+    , name : Maybe String
+    , avatar_url : Maybe String
+    }
+
+
+githubUserMetadataDecoder : Json.Decode.Decoder GitHubUserMetadata
+githubUserMetadataDecoder =
+    Json.Decode.map4 GitHubUserMetadata
+        (Json.Decode.field "provider_id" Json.Decode.string)
+        (Json.Decode.field "user_name" Json.Decode.string)
+        (Json.Decode.maybe (Json.Decode.field "name" Json.Decode.string))
+        (Json.Decode.maybe (Json.Decode.field "avatar_url" Json.Decode.string))
+
+
+getUserData :
+    { onResponse : Result Http.Error User -> msg
+    }
+    -> Context
+    -> Cmd msg
+getUserData props context =
+    Supabase.Context.toHttpRequest
+        { method = "GET"
+        , endpoint = "/auth/v1/user"
+        , body = Http.emptyBody
+        , expect = Http.expectJson props.onResponse userDecoder
+        }
+        context
+
+
+
+-- INTERNALS
 
 
 {-| Source: <https://github.com/supabase/gotrue-js/blob/67eb6169aeb1b1a42d7c7e7cbf6336aef79e55de/src/lib/types.ts#L5>
@@ -113,40 +174,3 @@ fromProviderToString provider =
 
         Zoom ->
             "zoom"
-
-
-signInWithOAuth :
-    Context
-    ->
-        { provider : OAuthProvider
-        , options : Maybe SignInWithOAuthOptions
-        , onResponse : Result Http.Error OAuthResponse -> msg
-        }
-    -> Cmd msg
-signInWithOAuth (Context context) props =
-    Http.request
-        { method = "POST"
-        , url = context.url ++ "/auth/v1/authorize"
-        , headers =
-            [ Http.header "apikey" context.apiKey
-            , Http.header "Content-Type" "application/json"
-            ]
-        , body =
-            Http.jsonBody
-                (Json.Encode.object
-                    [ ( "provider"
-                      , Json.Encode.string (fromProviderToString props.provider)
-                      )
-                    ]
-                )
-        , expect =
-            Http.expectJson
-                props.onResponse
-                (Json.Decode.succeed {})
-        , timeout = context.timeout
-        , tracker = context.tracker
-        }
-
-
-type alias OAuthResponse =
-    {}

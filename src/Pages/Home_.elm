@@ -88,7 +88,7 @@ subscriptions model =
 
 view : Path -> Model -> View Msg
 view path model =
-    { title = "Homepage"
+    { title = "Jangle | Dashboard"
     , body =
         [ div [ Css.col, Css.pad_32, Css.gap_16, Css.align_left ]
             [ h1 [ Css.font_h1 ] [ text ("Counter: " ++ String.fromInt model.counter) ]

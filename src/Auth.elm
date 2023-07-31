@@ -6,6 +6,7 @@ import Dict
 import Route exposing (Route)
 import Route.Path
 import Shared
+import Shared.Model
 import View exposing (View)
 
 
@@ -18,10 +19,16 @@ type alias User =
 onPageLoad : Shared.Model -> Route () -> Auth.Action.Action User
 onPageLoad shared route =
     case shared.user of
-        Just user ->
+        Auth.User.SignedIn user ->
             Auth.Action.loadPageWithUser user
 
-        Nothing ->
+        Auth.User.FetchingUserDetails response ->
+            Auth.Action.showLoadingPage
+                { title = "Signing in..."
+                , body = []
+                }
+
+        Auth.User.NotSignedIn ->
             Auth.Action.pushRoute
                 { path = Route.Path.SignIn
                 , query = Dict.empty
@@ -33,4 +40,6 @@ onPageLoad shared route =
 -}
 viewLoadingPage : Shared.Model -> Route () -> View Never
 viewLoadingPage shared route =
-    View.fromString "Loading..."
+    { title = "Signing in..."
+    , body = []
+    }
