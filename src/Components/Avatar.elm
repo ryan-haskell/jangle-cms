@@ -41,7 +41,7 @@ view props =
                 , span [ Css.ellipsis, Css.font_sublabel, Css.color_textSecondary ] [ text props.project ]
                 ]
     in
-    div [ Css.row, Css.gap_8, Css.overflow_hidden ]
+    div [ Css.row, Css.align_cy, Css.gap_8, Css.overflow_hidden ]
         [ viewImage
         , viewNameAndProject
         ]
