@@ -2,8 +2,10 @@ module Layouts.Sidebar exposing (Model, Msg, Props, layout)
 
 import Auth.User
 import Components.Button
+import Components.Header
 import Components.Icon
 import Components.Layout
+import Components.Sidebar
 import Css
 import Effect exposing (Effect)
 import Html exposing (..)
@@ -50,13 +52,13 @@ init _ =
 
 
 type Msg
-    = ReplaceMe
+    = ClickedUserControls
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        ReplaceMe ->
+        ClickedUserControls ->
             ( model
             , Effect.none
             )
@@ -73,15 +75,19 @@ subscriptions model =
 
 view : Props -> Route () -> { toContentMsg : Msg -> contentMsg, content : View contentMsg, model : Model } -> View contentMsg
 view props route { toContentMsg, model, content } =
-    { title = content.title
-    , body =
-        [ Components.Layout.new
-            { content = Html.div [ class "page" ] content.body
-            }
-            |> Components.Layout.withHeader { title = props.title }
-            |> Components.Layout.withSidebar
+    let
+        header : Components.Header.Header contentMsg
+        header =
+            Components.Header.new
+                { title = props.title
+                }
+
+        sidebar : Components.Sidebar.Sidebar contentMsg
+        sidebar =
+            Components.Sidebar.new
                 { current = route.path
                 , user = props.user
+                , onUserControlsClick = toContentMsg ClickedUserControls
                 , project = { id = "portfolio", name = "Portfolio Site" }
                 , contentLinks =
                     [ { typeId = "blog-posts"
@@ -94,6 +100,14 @@ view props route { toContentMsg, model, content } =
                       }
                     ]
                 }
+    in
+    { title = content.title
+    , body =
+        [ Components.Layout.new
+            { content = Html.div [ class "page" ] content.body
+            }
+            |> Components.Layout.withHeader header
+            |> Components.Layout.withSidebar sidebar
             |> Components.Layout.view
         ]
     }

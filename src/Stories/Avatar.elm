@@ -9,8 +9,8 @@ import Storybook.Controls
 
 
 type alias Controls =
-    { name : String
-    , project : String
+    { label : String
+    , sublabel : String
     , hasImage : Bool
     }
 
@@ -18,8 +18,8 @@ type alias Controls =
 decoder : Storybook.Controls.Decoder Controls
 decoder =
     Storybook.Controls.new Controls
-        |> Storybook.Controls.withText { id = "name" }
-        |> Storybook.Controls.withText { id = "project" }
+        |> Storybook.Controls.withText { id = "label" }
+        |> Storybook.Controls.withText { id = "sublabel" }
         |> Storybook.Controls.withBoolean { id = "image" }
 
 
@@ -42,8 +42,8 @@ type Msg
 view : Controls -> Html Msg
 view controls =
     Components.Avatar.view
-        { name = controls.name
-        , project = controls.project
+        { label = controls.label
+        , sublabel = controls.sublabel
         , image =
             if controls.hasImage then
                 Just "https://avatars.githubusercontent.com/u/6187256?v=4"

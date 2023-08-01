@@ -1,16 +1,16 @@
-import { Elm } from './Avatar.elm'
+import { Elm } from './UserControls.elm'
 import { render } from '../../.storybook/render'
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/html/writing-stories/introduction
 export default {
-  title: 'Components/Avatar',
-  render: render(Elm.Stories.Avatar),
+  title: 'Components/UserControls',
+  render: render(Elm.Stories.UserControls),
   parameters: {
     layout: 'centered'
   },
   argTypes: {
-    label: { control: 'text' },
-    sublabel: { control: 'text' },
+    name: { control: 'text' },
+    email: { control: 'text' },
     image: { control: 'boolean' },
   },
 }
@@ -19,15 +19,15 @@ export default {
 export const WithImage = {
   args: {
     image: true,
-    label: 'Ryan Haskell-Glatz',
-    sublabel: 'ryan@jangle.io',
+    name: 'Ryan Haskell-Glatz',
+    email: 'ryan@jangle.io',
   },
 }
 
 export const WithoutImage = {
   args: {
     image: false,
-    label: 'Ryan Haskell-Glatz',
-    sublabel: 'ryan@jangle.io',
+    name: 'Ryan Haskell-Glatz',
+    email: 'ryan@jangle.io',
   },
 }

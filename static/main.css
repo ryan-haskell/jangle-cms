@@ -35,6 +35,7 @@
   --px_48: 3rem;
   --px_96: 6rem;
   --px_240: 15rem;
+  --px_1200: 75rem;
 
   --font_title: var(--px_48);
   --font_h1: var(--px_32);
@@ -109,6 +110,7 @@ body {
   font: inherit;
   color: inherit;
   text-decoration: inherit;
+  text-align: inherit;
 }
 
 /* LAYOUT */
@@ -143,6 +145,8 @@ body {
 .gap_24 { gap: var(--px_24); }
 .gap_32 { gap: var(--px_32); }
 .gap_48 { gap: var(--px_48); }
+
+.gap_fill { justify-content: space-between; }
 
 .pad_8 { padding: var(--px_8); }
 .pad_12 { padding: var(--px_12); }
@@ -181,6 +185,10 @@ body {
 
 .w_32 { width: var(--px_32); }
 .w_240 { width: var(--px_240);}
+.w_fill { width: 100%; }
+
+.mw_1200 { max-width: var(--px_1200);}
+.mw_fill { max-width: 100%; }
 
 .h_32 { height: var(--px_32); }
 .h_96 { height: var(--px_96); }
@@ -197,6 +205,9 @@ body {
 .z1 { z-index: 1; }
 
 /* BORDERS */
+.border {
+  border: solid 1px var(--color_border);
+}
 .borderBottom {
   border-bottom: solid 1px var(--color_border);
 }
@@ -204,6 +215,7 @@ body {
   border-right: solid 1px var(--color_border);
 }
 
+.radius_8 { border-radius: 8px; }
 .radius_circle { border-radius: 9999px; }
 
 /* OVERFLOW */
@@ -320,4 +332,16 @@ body {
   border-top-color: var(--color_border);
   border-bottom-color: var(--color_border);
   background-color: var(--sidebarLink_selectedBg);
+}
+
+/* USER CONTROLS */
+
+.user_controls {
+  cursor: pointer;
+}
+.user_controls:hover { 
+  background-color: var(--button_secondaryBgHover); 
+}
+.user_controls:active { 
+  background-color: var(--button_secondaryBgActive); 
 }

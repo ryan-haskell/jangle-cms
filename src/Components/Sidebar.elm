@@ -1,23 +1,54 @@
-module Components.Sidebar exposing (view)
+module Components.Sidebar exposing
+    ( Sidebar, new
+    , view
+    )
 
-import Components.Avatar
+{-|
+
+@docs Sidebar, new
+@docs view
+
+-}
+
 import Components.Icon exposing (Icon)
 import Components.JangleLogo
 import Components.SidebarLink exposing (SidebarLink)
 import Components.SidebarLinkGroup
+import Components.UserControls
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
 import Route.Path exposing (Path)
 
 
-view :
+type Sidebar msg
+    = Sidebar
+        { current : Path
+        , user :
+            { name : String
+            , email : String
+            , image : Maybe String
+            }
+        , project : { id : String, name : String }
+        , onUserControlsClick : msg
+        , contentLinks :
+            List
+                { icon : Icon
+                , label : String
+                , typeId : String
+                }
+        }
+
+
+new :
     { current : Path
     , user :
         { user
             | name : String
+            , email : String
             , image : Maybe String
         }
+    , onUserControlsClick : msg
     , project : { id : String, name : String }
     , contentLinks :
         List
@@ -26,8 +57,23 @@ view :
             , typeId : String
             }
     }
-    -> Html msg
-view props =
+    -> Sidebar msg
+new props =
+    Sidebar
+        { current = props.current
+        , project = props.project
+        , contentLinks = props.contentLinks
+        , onUserControlsClick = props.onUserControlsClick
+        , user =
+            { name = props.user.name
+            , email = props.user.email
+            , image = props.user.image
+            }
+        }
+
+
+view : Sidebar msg -> Html msg
+view (Sidebar props) =
     let
         viewHeaderBrand : Html msg
         viewHeaderBrand =
@@ -85,11 +131,9 @@ view props =
             , viewTopLinks
             ]
         , div [ Css.shrink_none, Css.row, Css.pad_16, Css.overflow_hidden ]
-            [ Components.Avatar.view
-                { name = props.user.name
-                , image = props.user.image
-                , project = props.project.name
-                }
+            [ Components.UserControls.new { user = props.user }
+                |> Components.UserControls.withOnClick props.onUserControlsClick
+                |> Components.UserControls.view
             ]
         ]
 

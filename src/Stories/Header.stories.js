@@ -10,6 +10,7 @@ export default {
   },
   argTypes: {
     title: { control: 'text' },
+    userControls: { control: 'boolean' },
   },
 }
 
@@ -17,5 +18,12 @@ export default {
 export const Header = {
   args: {
     title: 'Dashboard',
+    userControls: false
+  },
+}
+export const WithUserControls = {
+  args: {
+    title: 'Dashboard',
+    userControls: true
   },
 }

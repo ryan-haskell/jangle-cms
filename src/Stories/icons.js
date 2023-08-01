@@ -4,7 +4,11 @@ export const icons = [
   'Menu',
   'Home',
   'Edit',
-  'Page'
+  'Page',
+  'Down',
+  'Right',
+  'Close',
+  'Search'
 ]
 
 export default {}

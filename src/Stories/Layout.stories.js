@@ -8,10 +8,30 @@ export default {
   parameters: {
     layout: 'fullscreen'
   },
-  argTypes: {},
+  argTypes: {
+    sidebar: { control: 'boolean' },
+    header: { control: 'boolean' },
+  },
 }
 
 // More on writing stories with args: https://storybook.js.org/docs/7.0/html/writing-stories/args
-export const Layout = {
-  args: {},
+export const Blank = {
+  args: {
+    header: false,
+    sidebar: false
+  },
+}
+
+export const Header = {
+  args: {
+    header: true,
+    sidebar: false
+  },
+}
+
+export const Sidebar = {
+  args: {
+    header: true,
+    sidebar: true
+  },
 }

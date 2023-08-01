@@ -41,3 +41,15 @@ export const Edit = {
 export const Page = {
   args: { icon: 'Page', size: '24px' },
 }
+export const Down = {
+  args: { icon: 'Down', size: '24px' },
+}
+export const Right = {
+  args: { icon: 'Right', size: '24px' },
+}
+export const Close = {
+  args: { icon: 'Close', size: '24px' },
+}
+export const Search = {
+  args: { icon: 'Search', size: '24px' },
+}

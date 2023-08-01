@@ -21,6 +21,10 @@ iconOptions =
     , ( "Menu", Components.Icon.Menu )
     , ( "Edit", Components.Icon.Edit )
     , ( "Page", Components.Icon.Page )
+    , ( "Down", Components.Icon.Down )
+    , ( "Right", Components.Icon.Right )
+    , ( "Close", Components.Icon.Close )
+    , ( "Search", Components.Icon.Search )
     ]
 
 

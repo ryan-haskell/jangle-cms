@@ -5,7 +5,12 @@ import Html exposing (..)
 import Html.Attributes as Attr
 
 
-view : { name : String, project : String, image : Maybe String } -> Html msg
+view :
+    { label : String
+    , sublabel : String
+    , image : Maybe String
+    }
+    -> Html msg
 view props =
     let
         viewImage : Html msg
@@ -34,14 +39,14 @@ view props =
                 ]
                 []
 
-        viewNameAndProject : Html msg
-        viewNameAndProject =
+        viewLabelAndSubLabel : Html msg
+        viewLabelAndSubLabel =
             div [ Css.overflow_hidden, Css.col ]
-                [ span [ Css.ellipsis, Css.font_label ] [ text props.name ]
-                , span [ Css.ellipsis, Css.font_sublabel, Css.color_textSecondary ] [ text props.project ]
+                [ span [ Css.ellipsis, Css.font_label ] [ text props.label ]
+                , span [ Css.ellipsis, Css.font_sublabel, Css.color_textSecondary ] [ text props.sublabel ]
                 ]
     in
     div [ Css.row, Css.align_cy, Css.gap_8, Css.overflow_hidden ]
         [ viewImage
-        , viewNameAndProject
+        , viewLabelAndSubLabel
         ]

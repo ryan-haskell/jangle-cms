@@ -26,7 +26,7 @@ main =
 
 
 type Msg
-    = NoOp
+    = ClickedUserControls
 
 
 
@@ -35,12 +35,14 @@ type Msg
 
 view : Controls -> Html Msg
 view controls =
-    Components.Sidebar.view
+    Components.Sidebar.new
         { current = Route.Path.Home_
         , user =
             { image = Just "https://avatars.githubusercontent.com/u/6187256?v=4"
             , name = "Ryan Haskell-Glatz"
+            , email = "ryan@jangle.io"
             }
+        , onUserControlsClick = ClickedUserControls
         , project = { id = "jangle", name = "Jangle" }
         , contentLinks =
             [ { icon = Components.Icon.Page
@@ -53,3 +55,4 @@ view controls =
               }
             ]
         }
+        |> Components.Sidebar.view
