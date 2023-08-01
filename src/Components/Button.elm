@@ -2,6 +2,7 @@ module Components.Button exposing
     ( Button, new
     , view
     , withOnClick, withHref
+    , withId
     , withStyleSecondary
     , withIcon
     )
@@ -12,6 +13,7 @@ module Components.Button exposing
 @docs view
 
 @docs withOnClick, withHref
+@docs withId
 @docs withStyleSecondary
 
 -}
@@ -30,6 +32,7 @@ import Html.Events
 type Button msg
     = Button
         { label : String
+        , id : Maybe String
         , onClick : Maybe (Action msg)
         , style : Style
         , icon : Maybe Icon
@@ -55,6 +58,7 @@ new props =
     Button
         { label = props.label
         , onClick = Nothing
+        , id = Nothing
         , style = Primary
         , icon = Nothing
         }
@@ -79,6 +83,11 @@ withHref url (Button props) =
     Button { props | onClick = Just (OpenUrl url) }
 
 
+withId : String -> Button msg -> Button msg
+withId id (Button props) =
+    Button { props | id = Just id }
+
+
 withIcon : Icon -> Button msg -> Button msg
 withIcon icon (Button props) =
     Button { props | icon = Just icon }
@@ -97,6 +106,12 @@ view (Button props) =
 
           else
             Attr.classList []
+        , case props.id of
+            Just id ->
+                Attr.id id
+
+            Nothing ->
+                Attr.classList []
         ]
         [ case props.icon of
             Just icon ->

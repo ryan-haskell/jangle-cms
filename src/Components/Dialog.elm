@@ -17,6 +17,7 @@ module Components.Dialog exposing
 
 import Components.Button
 import Components.Icon
+import Components.IconButton
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
@@ -94,16 +95,11 @@ view (Dialog props) =
         viewCloseButton : Html msg
         viewCloseButton =
             form [ Attr.method "dialog" ]
-                [ button
-                    [ Css.pad_8
-                    , Css.border
-                    , Css.radius_8
-                    , Css.bg_background
-                    , Css.controls
-                    , Attr.attribute "aria-label" "Close dialog"
-                    ]
-                    [ Components.Icon.view16 Components.Icon.Close
-                    ]
+                [ Components.IconButton.new
+                    { label = "Close dialog"
+                    , icon = Components.Icon.Close
+                    }
+                    |> Components.IconButton.view
                 ]
     in
     node "dialog"
@@ -127,7 +123,9 @@ view (Dialog props) =
             , Css.border
             , Css.radius_16
             , Css.pad_32
+            , Css.gap_32
             ]
             [ viewHeader
+            , div [ Css.fill ] props.content
             ]
         ]

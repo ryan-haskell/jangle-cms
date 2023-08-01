@@ -8,7 +8,8 @@ import Svg.Attributes
 
 
 viewCreateYourFirstProject :
-    { onClick : msg
+    { id : String
+    , onClick : msg
     }
     -> Html msg
 viewCreateYourFirstProject props =
@@ -18,6 +19,7 @@ viewCreateYourFirstProject props =
         , subtitle = "Welcome to Jangle! Let's get started by connecting to any existing GitHub repository."
         , button =
             { label = "Create new project"
+            , id = props.id
             , onClick = props.onClick
             }
         }
@@ -31,7 +33,11 @@ viewEmptyStateWithOptions :
     { image : Html msg
     , title : String
     , subtitle : String
-    , button : { label : String, onClick : msg }
+    , button :
+        { id : String
+        , label : String
+        , onClick : msg
+        }
     }
     -> Html msg
 viewEmptyStateWithOptions props =
@@ -58,6 +64,7 @@ viewEmptyStateWithOptions props =
             ]
         , Components.Button.new { label = props.button.label }
             |> Components.Button.withOnClick props.button.onClick
+            |> Components.Button.withId props.button.id
             |> Components.Button.view
         ]
 

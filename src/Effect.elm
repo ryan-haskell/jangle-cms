@@ -4,7 +4,7 @@ port module Effect exposing
     , sendCmd, sendMsg
     , pushRoute, replaceRoute, loadExternalUrl
     , map, toCmd
-    , saveOAuthResponse
+    , saveOAuthResponse, clearOAuthResponse
     , fetchSupabaseUser
     , showDialog
     )
@@ -21,7 +21,7 @@ port module Effect exposing
 
 ## Custom effects
 
-@docs saveOAuthResponse
+@docs saveOAuthResponse, clearOAuthResponse
 @docs fetchSupabaseUser
 
 -}
@@ -142,6 +142,14 @@ saveOAuthResponse oauthResponse =
     Save
         { key = "oAuthResponse"
         , value = Supabase.OAuthResponse.encode oauthResponse
+        }
+
+
+clearOAuthResponse : Effect msg
+clearOAuthResponse =
+    Save
+        { key = "oAuthResponse"
+        , value = Json.Encode.null
         }
 
 

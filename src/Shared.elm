@@ -100,8 +100,8 @@ update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
         Shared.Msg.SupabaseUserApiResponded (Err httpError) ->
-            ( model
-            , Effect.none
+            ( { model | user = Auth.User.NotSignedIn }
+            , Effect.clearOAuthResponse
               -- |> Debug.log "TODO: Report this error to Sentry"
             )
 

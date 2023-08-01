@@ -19,9 +19,7 @@ decoder =
             { id = "variant"
             , options =
                 [ ( "CreateYourFirstProject"
-                  , Components.EmptyState.viewCreateYourFirstProject
-                        { onClick = ClickedCreateNewProject
-                        }
+                  , viewCreateYourFirstProject
                   )
                 ]
             }
@@ -50,6 +48,11 @@ view controls =
             viewSelectedEmptyState
 
         Nothing ->
-            Components.EmptyState.viewCreateYourFirstProject
-                { onClick = ClickedCreateNewProject
-                }
+            viewCreateYourFirstProject
+
+
+viewCreateYourFirstProject =
+    Components.EmptyState.viewCreateYourFirstProject
+        { id = "button__create-first-project"
+        , onClick = ClickedCreateNewProject
+        }
