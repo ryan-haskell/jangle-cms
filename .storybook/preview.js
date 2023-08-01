@@ -13,4 +13,8 @@ export const argTypes = {
     action: 'Elm',
     table: { disable: true }
   },
+  onElmUrl: {
+    action: 'URL',
+    table: { disable: true }
+  },
 }

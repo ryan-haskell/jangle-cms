@@ -6,6 +6,7 @@ port module Effect exposing
     , map, toCmd
     , saveOAuthResponse
     , fetchSupabaseUser
+    , showDialog
     )
 
 {-|
@@ -58,6 +59,8 @@ type Effect msg
         }
       -- SUPABASE
     | Supabase SupabaseRequest
+      -- DIALOGS
+    | ShowDialog { id : String }
 
 
 
@@ -156,6 +159,15 @@ fetchSupabaseUser =
 
 
 
+-- DIALOGS
+
+
+showDialog : { id : String } -> Effect msg
+showDialog { id } =
+    ShowDialog { id = id }
+
+
+
 -- INTERNALS
 
 
@@ -191,6 +203,9 @@ map fn effect =
 
         Save data ->
             Save data
+
+        ShowDialog data ->
+            ShowDialog data
 
 
 {-| Elm Land depends on this function to perform your effects.
@@ -281,6 +296,15 @@ toCmd options effect =
                                 >> options.fromSharedMsg
                         }
                         context
+
+        ShowDialog { id } ->
+            outgoing
+                { tag = "SHOW_DIALOG"
+                , data =
+                    Json.Encode.object
+                        [ ( "id", Json.Encode.string id )
+                        ]
+                }
 
 
 port outgoing :

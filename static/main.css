@@ -26,6 +26,7 @@
   --weight_600: 600;
   --weight_800: 800;
 
+  --px_4: 0.25rem;
   --px_8: 0.5rem;
   --px_12: 0.75rem;
   --px_14: 0.875rem;
@@ -36,6 +37,7 @@
   --px_96: 6rem;
   --px_240: 15rem;
   --px_320: 20rem;
+  --px_640: 40rem;
   --px_1200: 75rem;
 
   --font_title: var(--px_48);
@@ -103,6 +105,16 @@ body {
   font-family: var(--family_body);
 }
 
+dialog {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+}
+dialog::backdrop {
+  background: rgba(0,0,0,0.50);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -140,6 +152,7 @@ body {
 
 .align_center { justify-content: center; align-items: center; }
 
+.gap_4 { gap: var(--px_4); }
 .gap_8 { gap: var(--px_8); }
 .gap_12 { gap: var(--px_12); }
 .gap_16 { gap: var(--px_16); }
@@ -186,6 +199,7 @@ body {
 
 .w_32 { width: var(--px_32); }
 .w_240 { width: var(--px_240);}
+.w_640 { width: var(--px_640);}
 .w_fill { width: 100%; }
 
 .mw_320 { max-width: var(--px_320); }
@@ -218,6 +232,7 @@ body {
 }
 
 .radius_8 { border-radius: 8px; }
+.radius_16 { border-radius: 16px; }
 .radius_circle { border-radius: 9999px; }
 
 /* OVERFLOW */
@@ -337,14 +352,14 @@ body {
   background-color: var(--sidebarLink_selectedBg);
 }
 
-/* USER CONTROLS */
+/* CONTROLS */
 
-.user_controls {
+.controls {
   cursor: pointer;
 }
-.user_controls:hover { 
+.controls:hover { 
   background-color: var(--button_secondaryBgHover); 
 }
-.user_controls:active { 
+.controls:active { 
   background-color: var(--button_secondaryBgActive); 
 }

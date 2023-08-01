@@ -81,7 +81,7 @@ view (UserControls props) =
           else
             Attr.classList []
         , Css.radius_8
-        , Css.user_controls
+        , Css.controls
         , case props.onClick of
             Just onClick ->
                 Html.Events.onClick onClick

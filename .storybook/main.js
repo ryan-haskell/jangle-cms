@@ -1,4 +1,4 @@
-import ElmVitePlugin from 'vite-plugin-elm'
+import ElmVitePlugin from './plugins/vite-plugin-elm'
 
 export default {
   stories: [

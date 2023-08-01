@@ -46,7 +46,7 @@ decoder =
 
 main : Storybook.Component.Component Controls () Msg
 main =
-    Storybook.Component.new
+    Storybook.Component.simple
         { controls = decoder
         , view = view
         }

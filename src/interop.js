@@ -28,7 +28,15 @@ export const onReady = ({ app, env }) => {
   if (app.ports && app.ports.outgoing) {
     app.ports.outgoing.subscribe(({ tag, data }) => {
       switch (tag) {
-        case 'SAVE': return Storage.save(data)
+        case 'SAVE':
+          Storage.save(data)
+          break
+        case 'SHOW_DIALOG':
+          let dialog = document.getElementById(data.id)
+          if (dialog && dialog.showModal) {
+            dialog.showModal()
+          }
+          break
       }
     })
   }
