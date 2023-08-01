@@ -1,13 +1,13 @@
 module Components.UserControls exposing
     ( UserControls, new
-    , withOnClick
+    , withOnClick, withWidthFill
     , view
     )
 
 {-|
 
 @docs UserControls, new
-@docs withOnClick
+@docs withOnClick, withWidthFill
 
 @docs view
 
@@ -29,6 +29,7 @@ type UserControls msg
             , image : Maybe String
             }
         , onClick : Maybe msg
+        , isWidthFill : Bool
         }
 
 
@@ -49,12 +50,18 @@ new props =
             , image = props.user.image
             }
         , onClick = Nothing
+        , isWidthFill = False
         }
 
 
 withOnClick : msg -> UserControls msg -> UserControls msg
 withOnClick onClick (UserControls props) =
     UserControls { props | onClick = Just onClick }
+
+
+withWidthFill : UserControls msg -> UserControls msg
+withWidthFill (UserControls props) =
+    UserControls { props | isWidthFill = True }
 
 
 view : UserControls msg -> Html msg
@@ -68,7 +75,11 @@ view (UserControls props) =
         , Css.border
         , Css.mw_fill
         , Css.pad_16
-        , Css.fill
+        , if props.isWidthFill then
+            Css.fill
+
+          else
+            Attr.classList []
         , Css.radius_8
         , Css.user_controls
         , case props.onClick of

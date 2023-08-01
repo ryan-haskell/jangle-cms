@@ -133,6 +133,7 @@ view (Sidebar props) =
         , div [ Css.shrink_none, Css.row, Css.pad_16, Css.overflow_hidden ]
             [ Components.UserControls.new { user = props.user }
                 |> Components.UserControls.withOnClick props.onUserControlsClick
+                |> Components.UserControls.withWidthFill
                 |> Components.UserControls.view
             ]
         ]

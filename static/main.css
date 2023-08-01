@@ -35,6 +35,7 @@
   --px_48: 3rem;
   --px_96: 6rem;
   --px_240: 15rem;
+  --px_320: 20rem;
   --px_1200: 75rem;
 
   --font_title: var(--px_48);
@@ -187,6 +188,7 @@ body {
 .w_240 { width: var(--px_240);}
 .w_fill { width: 100%; }
 
+.mw_320 { max-width: var(--px_320); }
 .mw_1200 { max-width: var(--px_1200);}
 .mw_fill { max-width: 100%; }
 
@@ -276,7 +278,8 @@ body {
   font-family: var(--family_body);
   font-weight: var(--weight_400);
 }
-
+.line_140 { line-height: 1.40; }
+.text_center { text-align: center; }
 .uppercase { text-transform: uppercase; }
 
 /* BUTTON */

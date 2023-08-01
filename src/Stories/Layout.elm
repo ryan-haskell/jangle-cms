@@ -46,7 +46,7 @@ view : Controls -> Html Msg
 view controls =
     let
         user =
-            { name = "Janna Moon"
+            { name = "Ryan Haskell-Glatz"
             , email = "ryan@jangle.io"
             , image = Just "https://avatars.githubusercontent.com/u/6187256?v=4"
             }
