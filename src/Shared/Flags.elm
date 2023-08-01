@@ -9,14 +9,16 @@ import Supabase.OAuthResponse
 
 
 type alias Flags =
-    { supabase : SupabaseInfo
-    , oAuthResponse : Maybe Supabase.OAuthResponse.OAuthResponse
+    { baseUrl : String
+    , supabase : SupabaseInfo
+    , cachedOAuthResponse : Maybe Supabase.OAuthResponse.OAuthResponse
     }
 
 
 decoder : Json.Decode.Decoder Flags
 decoder =
-    Json.Decode.map2 Flags
+    Json.Decode.map3 Flags
+        (Json.Decode.field "baseUrl" Json.Decode.string)
         supabaseInfoDecoder
         (Json.Decode.maybe (Json.Decode.field "oAuthResponse" Supabase.OAuthResponse.decoder))
 

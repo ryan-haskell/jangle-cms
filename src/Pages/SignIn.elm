@@ -9,6 +9,8 @@ import Html exposing (..)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Url
+import Url.Builder
 import View exposing (View)
 
 
@@ -72,7 +74,15 @@ view shared model =
     let
         gitHubOAuthUrl : String
         gitHubOAuthUrl =
-            shared.supabase.url ++ "/auth/v1/authorize?provider=github"
+            let
+                queryParams : String
+                queryParams =
+                    Url.Builder.toQuery
+                        [ Url.Builder.string "provider" "github"
+                        , Url.Builder.string "redirect_to" shared.flags.baseUrl
+                        ]
+            in
+            shared.flags.supabase.url ++ "/auth/v1/authorize" ++ queryParams
     in
     { title = "Jangle | Sign in"
     , body =

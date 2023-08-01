@@ -256,8 +256,8 @@ toCmd options effect =
                 context : Supabase.Context.Context
                 context =
                     Supabase.Context.create
-                        { apiKey = options.shared.supabase.apiKey
-                        , url = options.shared.supabase.url
+                        { apiKey = options.shared.flags.supabase.apiKey
+                        , url = options.shared.flags.supabase.url
                         }
                         |> withUserToken
 

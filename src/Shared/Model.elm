@@ -5,6 +5,6 @@ import Shared.Flags
 
 
 type alias Model =
-    { supabase : Shared.Flags.SupabaseInfo
+    { flags : Shared.Flags.Flags
     , user : Auth.User.SignInStatus
     }

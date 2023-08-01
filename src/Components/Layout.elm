@@ -25,14 +25,14 @@ import Route.Path exposing (Path)
 
 type Layout msg
     = Layout
-        { content : Html msg
+        { content : List (Html msg)
         , header : Maybe (Components.Header.Header msg)
         , isContentCentered : Bool
         , sidebar : Maybe (Components.Sidebar.Sidebar msg)
         }
 
 
-new : { content : Html msg } -> Layout msg
+new : { content : List (Html msg) } -> Layout msg
 new props =
     Layout
         { content = props.content
@@ -90,6 +90,6 @@ view (Layout props) =
                   else
                     Attr.classList []
                 ]
-                [ props.content ]
+                props.content
             ]
         ]

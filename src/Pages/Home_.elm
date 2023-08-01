@@ -2,6 +2,7 @@ module Pages.Home_ exposing (..)
 
 import Auth
 import Components.Button
+import Components.EmptyState
 import Components.Icon
 import Components.Layout
 import Css
@@ -27,7 +28,7 @@ page user shared route =
         }
         |> Page.withLayout
             (\_ ->
-                Layouts.Sidebar
+                Layouts.Header
                     { title = "Dashboard"
                     , user = user
                     }
@@ -39,13 +40,13 @@ page user shared route =
 
 
 type alias Model =
-    { counter : Int
+    { isDialogOpen : Bool
     }
 
 
 init : () -> ( Model, Effect Msg )
 init () =
-    ( { counter = 0 }
+    ( { isDialogOpen = False }
     , Effect.none
     )
 
@@ -55,20 +56,14 @@ init () =
 
 
 type Msg
-    = Increment
-    | Decrement
+    = ClickedCreateFirstProject
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        Increment ->
-            ( { model | counter = model.counter + 1 }
-            , Effect.none
-            )
-
-        Decrement ->
-            ( { model | counter = model.counter - 1 }
+        ClickedCreateFirstProject ->
+            ( { model | isDialogOpen = True }
             , Effect.none
             )
 
@@ -90,17 +85,11 @@ view : Path -> Model -> View Msg
 view path model =
     { title = "Jangle | Dashboard"
     , body =
-        [ div [ Css.col, Css.pad_32, Css.gap_16, Css.align_left ]
-            [ h1 [ Css.font_h1 ] [ text ("Counter: " ++ String.fromInt model.counter) ]
-            , div [ Css.row, Css.gap_8 ]
-                [ Components.Button.new { label = "Increment" }
-                    |> Components.Button.withOnClick Increment
-                    |> Components.Button.view
-                , Components.Button.new { label = "Decrement" }
-                    |> Components.Button.withStyleSecondary
-                    |> Components.Button.withOnClick Decrement
-                    |> Components.Button.view
-                ]
+        [ div [ Css.col, Css.fill, Css.align_center ]
+            [ Components.EmptyState.viewCreateYourFirstProject
+                { onClick = ClickedCreateFirstProject
+                }
+            , div [ Css.h_96 ] []
             ]
         ]
     }

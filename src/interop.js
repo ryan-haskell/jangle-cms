@@ -14,6 +14,7 @@ export const flags = async ({ env }) => {
 
   return {
     env,
+    baseUrl: window.location.origin,
     oAuthResponse: Storage.load('oAuthResponse')
   }
 }

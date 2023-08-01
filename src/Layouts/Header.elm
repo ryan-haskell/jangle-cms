@@ -1,15 +1,14 @@
-module Layouts.Sidebar exposing (Model, Msg, Props, layout)
+module Layouts.Header exposing (Model, Msg, Props, layout)
 
 import Auth.User
 import Components.Button
 import Components.Header
 import Components.Icon
 import Components.Layout
-import Components.Sidebar
+import Components.UserControls
 import Css
 import Effect exposing (Effect)
 import Html exposing (..)
-import Html.Attributes exposing (class)
 import Layout exposing (Layout)
 import Route exposing (Route)
 import Shared
@@ -81,25 +80,14 @@ view props route { toContentMsg, model, content } =
             Components.Header.new
                 { title = props.title
                 }
+                |> Components.Header.withUserControls userControls
 
-        sidebar : Components.Sidebar.Sidebar contentMsg
-        sidebar =
-            Components.Sidebar.new
-                { current = route.path
-                , user = props.user
-                , onUserControlsClick = toContentMsg ClickedUserControls
-                , project = { id = "portfolio", name = "Portfolio Site" }
-                , contentLinks =
-                    [ { typeId = "blog-posts"
-                      , icon = Components.Icon.Edit
-                      , label = "Blog posts"
-                      }
-                    , { typeId = "contact-info"
-                      , icon = Components.Icon.Page
-                      , label = "Contact Info"
-                      }
-                    ]
+        userControls : Components.UserControls.UserControls contentMsg
+        userControls =
+            Components.UserControls.new
+                { user = props.user
                 }
+                |> Components.UserControls.withOnClick (toContentMsg ClickedUserControls)
     in
     { title = content.title
     , body =
@@ -107,7 +95,6 @@ view props route { toContentMsg, model, content } =
             { content = content.body
             }
             |> Components.Layout.withHeader header
-            |> Components.Layout.withSidebar sidebar
             |> Components.Layout.view
         ]
     }

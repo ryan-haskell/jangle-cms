@@ -51,21 +51,22 @@ init flagsResult route =
         flags =
             flagsResult
                 |> Result.withDefault
-                    { supabase = { url = "???", apiKey = "???" }
-                    , oAuthResponse = Nothing
+                    { baseUrl = "https://app.jangle.io"
+                    , supabase = { url = "???", apiKey = "???" }
+                    , cachedOAuthResponse = Nothing
                     }
 
         lastOAuthResponse : Maybe Supabase.OAuthResponse.OAuthResponse
         lastOAuthResponse =
             List.filterMap identity
                 [ Supabase.OAuthResponse.fromUrlFragment route.hash
-                , flags.oAuthResponse
+                , flags.cachedOAuthResponse
                 ]
                 |> List.head
     in
     case lastOAuthResponse of
         Just oAuthResponse ->
-            ( { supabase = flags.supabase
+            ( { flags = flags
               , user = Auth.User.FetchingUserDetails oAuthResponse
               }
             , Effect.batch
@@ -80,7 +81,7 @@ init flagsResult route =
             )
 
         Nothing ->
-            ( { supabase = flags.supabase
+            ( { flags = flags
               , user = Auth.User.NotSignedIn
               }
             , Effect.none

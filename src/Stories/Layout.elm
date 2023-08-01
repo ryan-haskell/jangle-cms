@@ -109,12 +109,13 @@ view controls =
     in
     Components.Layout.new
         { content =
-            div
+            [ div
                 [ Css.pad_32
                 , Css.color_textSecondary
                 , Html.Attributes.style "min-height" "1000vh"
                 ]
                 [ text "✨ Page content goes here" ]
+            ]
         }
         |> withHeader
         |> withSidebar

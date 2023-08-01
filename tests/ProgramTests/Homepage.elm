@@ -2,9 +2,9 @@ module ProgramTests.Homepage exposing (..)
 
 import Effect exposing (Effect)
 import Pages.Home_ exposing (Model, Msg)
-import ProgramTest exposing (..)
+import ProgramTest exposing (ProgramTest)
 import Route.Path
-import Test exposing (..)
+import Test exposing (Test)
 import Test.Html.Selector exposing (text)
 
 
@@ -28,22 +28,18 @@ start =
 
 suite : Test
 suite =
-    describe "Homepage"
-        [ describe "Increment button"
-            [ test "Page starts with counter value of 0" <|
+    Test.describe "Homepage"
+        [ Test.describe "Create your first project"
+            [ Test.test "Page has button with label 'Create new project'" <|
                 \() ->
                     start
-                        |> expectViewHas [ text "Counter: 0" ]
-            , test "Clicking increment button updates counter to 1" <|
-                \() ->
-                    start
-                        |> clickButton "Increment"
-                        |> expectViewHas [ text "Counter: 1" ]
-            , test "Clicking increment button twice updates the counter to 2" <|
-                \() ->
-                    start
-                        |> clickButton "Increment"
-                        |> clickButton "Increment"
-                        |> expectViewHas [ text "Counter: 2" ]
+                        |> ProgramTest.expectViewHas [ text "Create new project" ]
+
+            -- , Test.skip <|
+            --     Test.test "Clicking 'Create new project' button shows a dialog" <|
+            --         \() ->
+            --             start
+            --                 |> ProgramTest.clickButton "Create new project"
+            --                 |> ProgramTest.expectViewHas [ text "Create a project" ]
             ]
         ]
