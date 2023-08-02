@@ -88,6 +88,7 @@ view (UserControls props) =
 
             Nothing ->
                 Attr.classList []
+        , Attr.attribute "aria-label" "Manage user settings"
         ]
         [ Components.Avatar.view
             { label = props.user.name

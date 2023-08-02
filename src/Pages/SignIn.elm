@@ -83,7 +83,11 @@ view shared model =
                     (Supabase.Auth.toGitHubOAuthUrl
                         { redirectTo = shared.flags.baseUrl
                         , supabaseUrl = shared.flags.supabase.url
-                        , scopes = []
+                        , scopes =
+                            [ "repo"
+                            , "read:user"
+                            , "user:email"
+                            ]
                         }
                     )
                 |> Components.Button.view

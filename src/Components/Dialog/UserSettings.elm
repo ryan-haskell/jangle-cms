@@ -32,7 +32,7 @@ view props =
     Components.Dialog.new
         { title = "User settings"
         , content =
-            [ div [ Css.col, Css.gap_16, Css.align_left ]
+            [ div [ Css.col, Css.gap_16, Css.align_center, Css.pad_48 ]
                 [ Components.Button.new { label = "Sign out" }
                     |> Components.Button.withStyleSecondary
                     |> Components.Button.withOnClick props.onSignOutClick

@@ -178,6 +178,9 @@ fromProviderToString provider =
             "zoom"
 
 
+{-| More on scopes here:
+<https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps>
+-}
 toGitHubOAuthUrl :
     { redirectTo : String
     , supabaseUrl : String
@@ -192,8 +195,6 @@ toGitHubOAuthUrl { redirectTo, supabaseUrl, scopes } =
                 |> Just
             , Url.Builder.string "redirect_to" redirectTo
                 |> Just
-
-            -- https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps
             , if List.isEmpty scopes then
                 Nothing
 

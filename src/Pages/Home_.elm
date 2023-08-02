@@ -106,10 +106,10 @@ view user model =
         , Components.Dialog.new
             { title = "Create a project"
             , content =
-                [ div [ Css.col, Css.gap_12, Css.sidebar_link, Css.color_textSecondary ]
+                [ div [ Css.col, Css.gap_16 ]
                     [ p [ Css.line_140 ]
                         [ text
-                            ("Hey ${name}! 👋 This form isn't quite ready yet..."
+                            ("👋 Hey ${name}! This form isn't quite ready yet..."
                                 |> String.replace "${name}"
                                     (String.split " " user.name
                                         |> List.head
