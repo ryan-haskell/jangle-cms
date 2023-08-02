@@ -2,7 +2,9 @@ module Stories.Field exposing (main)
 
 import Components.Field
 import Components.Input
-import Html exposing (Html)
+import Css
+import Html exposing (..)
+import Html.Attributes as Attr
 import Json.Decode
 import Storybook.Component
 import Storybook.Controls
@@ -15,6 +17,7 @@ type alias Controls =
     , error : String
     , label : String
     , sublabel : String
+    , isWidthFill : Bool
     }
 
 
@@ -56,6 +59,7 @@ decoder =
         |> Storybook.Controls.withText { id = "error" }
         |> Storybook.Controls.withText { id = "label" }
         |> Storybook.Controls.withText { id = "sublabel" }
+        |> Storybook.Controls.withBoolean { id = "isWidthFill" }
 
 
 main : Storybook.Component.Component Controls Model Msg
@@ -121,9 +125,28 @@ view controls model =
 
                 Nothing ->
                     field
+
+        withWidthFill :
+            Components.Field.Field Msg
+            -> Components.Field.Field Msg
+        withWidthFill field =
+            if controls.isWidthFill then
+                field |> Components.Field.withWidthFill
+
+            else
+                field
     in
-    Components.Field.new { input = input }
-        |> Components.Field.withErrorMessage
-            (String.Extra.nonBlank controls.error)
-        |> withLabels
-        |> Components.Field.view
+    div
+        [ if controls.isWidthFill then
+            Css.w_640
+
+          else
+            Attr.classList []
+        ]
+        [ Components.Field.new { input = input }
+            |> Components.Field.withErrorMessage
+                (String.Extra.nonBlank controls.error)
+            |> withLabels
+            |> withWidthFill
+            |> Components.Field.view
+        ]

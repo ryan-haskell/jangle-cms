@@ -20,6 +20,7 @@ export default {
     error: { control: 'text' },
     label: { control: 'text' },
     sublabel: { control: 'text' },
+    isWidthFill: { control: 'boolean' },
   },
 }
 
@@ -30,7 +31,8 @@ export const Text = {
     labels: 'LabelAndSublabel',
     label: 'Project name',
     sublabel: 'What should we call this project?',
-    error: ''
+    error: '',
+    isWidthFill: false
   }
 }
 export const Search = {
@@ -39,7 +41,8 @@ export const Search = {
     labels: 'Label',
     label: 'Find a repository',
     sublabel: 'Search GitHub repositories by name',
-    error: ''
+    error: '',
+    isWidthFill: false
   }
 }
 export const Multiline = {
@@ -48,6 +51,7 @@ export const Multiline = {
     labels: 'LabelAndSublabel',
     label: 'Bio',
     sublabel: 'Tell us a bit about yourself',
-    error: 'Bio cannot be blank'
+    error: 'Bio cannot be blank',
+    isWidthFill: false
   }
 }

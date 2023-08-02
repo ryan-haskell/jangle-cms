@@ -3,6 +3,7 @@ module Components.Input exposing
     , withOnInput
     , withStyleSearch, withStyleMultiline
     , withError
+    , withWidthFill
     , view
     )
 
@@ -12,6 +13,7 @@ module Components.Input exposing
 @docs withOnInput
 @docs withStyleSearch, withStyleMultiline
 @docs withError
+@docs withWidthFill
 
 @docs view
 
@@ -30,6 +32,7 @@ type Input msg
         , style : Style
         , hasError : Bool
         , onInput : Maybe (String -> msg)
+        , isWidthFill : Bool
         }
 
 
@@ -46,6 +49,7 @@ new props =
         , style = Text
         , hasError = False
         , onInput = Nothing
+        , isWidthFill = False
         }
 
 
@@ -69,6 +73,11 @@ withError hasError (Input props) =
     Input { props | hasError = hasError }
 
 
+withWidthFill : Input msg -> Input msg
+withWidthFill (Input props) =
+    Input { props | isWidthFill = True }
+
+
 view : Input msg -> Html msg
 view (Input props) =
     let
@@ -88,6 +97,14 @@ view (Input props) =
 
             else
                 Attr.classList []
+
+        widthAttr : Html.Attribute msg
+        widthAttr =
+            if props.isWidthFill then
+                Css.w_fill
+
+            else
+                Attr.classList []
     in
     case props.style of
         Text ->
@@ -96,11 +113,12 @@ view (Input props) =
                 , Attr.value props.value
                 , onInputAttribute
                 , errorAttribute
+                , widthAttr
                 ]
                 []
 
         Search ->
-            div [ Css.row, Css.relative ]
+            div [ Css.row, Css.relative, widthAttr ]
                 [ div
                     [ Css.absolute
                     , Css.w_40
@@ -117,6 +135,7 @@ view (Input props) =
                     , Attr.value props.value
                     , onInputAttribute
                     , errorAttribute
+                    , widthAttr
                     ]
                     []
                 ]
@@ -128,5 +147,6 @@ view (Input props) =
                 , Attr.value props.value
                 , onInputAttribute
                 , errorAttribute
+                , widthAttr
                 ]
                 []

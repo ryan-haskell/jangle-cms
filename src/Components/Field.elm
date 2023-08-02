@@ -2,6 +2,7 @@ module Components.Field exposing
     ( Field, new
     , withLabel, withLabelAndSublabel
     , withErrorMessage
+    , withWidthFill
     , view
     )
 
@@ -10,6 +11,7 @@ module Components.Field exposing
 @docs Field, new
 @docs withLabel, withLabelAndSublabel
 @docs withErrorMessage
+@docs withWidthFill
 @docs view
 
 -}
@@ -17,6 +19,7 @@ module Components.Field exposing
 import Components.Input
 import Css
 import Html exposing (..)
+import Html.Attributes as Attr
 import Svg
 import Svg.Attributes as SvgAttr
 
@@ -26,6 +29,7 @@ type Field msg
         { label : Label
         , error : Maybe String
         , input : Components.Input.Input msg
+        , isWidthFill : Bool
         }
 
 
@@ -44,6 +48,7 @@ new props =
         { label = None
         , error = Nothing
         , input = props.input
+        , isWidthFill = False
         }
 
 
@@ -65,6 +70,11 @@ withLabelAndSublabel labelAndSublabel (Field props) =
 withErrorMessage : Maybe String -> Field msg -> Field msg
 withErrorMessage error (Field props) =
     Field { props | error = error }
+
+
+withWidthFill : Field msg -> Field msg
+withWidthFill (Field props) =
+    Field { props | isWidthFill = True }
 
 
 view : Field msg -> Html msg
@@ -109,12 +119,30 @@ view (Field props) =
                             ]
                             [ text error ]
                         ]
+
+        widthAttr : Html.Attribute msg
+        widthAttr =
+            if props.isWidthFill then
+                Css.w_fill
+
+            else
+                Attr.classList []
+
+        viewInput : Html msg
+        viewInput =
+            props.input
+                |> Components.Input.withError (props.error /= Nothing)
+                |> (if props.isWidthFill then
+                        Components.Input.withWidthFill
+
+                    else
+                        identity
+                   )
+                |> Components.Input.view
     in
-    label [ Css.col, Css.gap_8 ]
+    label [ Css.col, Css.gap_8, widthAttr ]
         [ viewLabels
-        , props.input
-            |> Components.Input.withError (props.error /= Nothing)
-            |> Components.Input.view
+        , viewInput
         , viewError
         ]
 
