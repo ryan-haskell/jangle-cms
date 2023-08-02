@@ -48,7 +48,11 @@ view (Header props) =
         viewUserControls : Html msg
         viewUserControls =
             Html.Extra.viewMaybe
-                Components.UserControls.view
+                (\userControls ->
+                    userControls
+                        |> Components.UserControls.withIconOnMobile
+                        |> Components.UserControls.view
+                )
                 props.userControls
     in
     header

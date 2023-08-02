@@ -1,6 +1,7 @@
 module Components.UserControls exposing
     ( UserControls, new
     , withOnClick, withWidthFill
+    , withIconOnMobile
     , view
     )
 
@@ -8,6 +9,7 @@ module Components.UserControls exposing
 
 @docs UserControls, new
 @docs withOnClick, withWidthFill
+@docs withIconOnMobile
 
 @docs view
 
@@ -15,11 +17,13 @@ module Components.UserControls exposing
 
 import Components.Avatar
 import Components.Icon
+import Components.IconButton
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Attributes.Extra
 import Html.Events
+import Html.Extra
 
 
 type UserControls msg
@@ -31,6 +35,7 @@ type UserControls msg
             }
         , onClick : Maybe msg
         , isWidthFill : Bool
+        , isResponsive : Bool
         }
 
 
@@ -52,6 +57,7 @@ new props =
             }
         , onClick = Nothing
         , isWidthFill = False
+        , isResponsive = False
         }
 
 
@@ -65,31 +71,73 @@ withWidthFill (UserControls props) =
     UserControls { props | isWidthFill = True }
 
 
+withIconOnMobile : UserControls msg -> UserControls msg
+withIconOnMobile (UserControls props) =
+    UserControls { props | isResponsive = True }
+
+
 view : UserControls msg -> Html msg
 view (UserControls props) =
-    button
+    let
+        onClickAttribute : Html.Attribute msg
+        onClickAttribute =
+            Html.Attributes.Extra.attributeMaybe
+                Html.Events.onClick
+                props.onClick
+
+        viewDefaultButton =
+            button
+                [ Css.row
+                , Html.Attributes.Extra.attributeIf
+                    props.isResponsive
+                    Css.mobile_hide
+                , Css.gap_16
+                , Css.gap_fill
+                , Css.align_cy
+                , Css.bg_background
+                , Css.border
+                , Css.mw_fill
+                , Css.pad_16
+                , Html.Attributes.Extra.attributeIf
+                    props.isWidthFill
+                    Css.fill
+                , Css.radius_8
+                , Css.controls
+                , onClickAttribute
+                , Attr.attribute "aria-label" "Manage user settings"
+                ]
+                [ Components.Avatar.view
+                    { label = props.user.name
+                    , sublabel = props.user.email
+                    , image = props.user.image
+                    }
+                , Components.Icon.view24 Components.Icon.Down
+                ]
+
+        viewMobileButton =
+            div [ Css.mobile_only ]
+                [ Components.IconButton.new
+                    { label = "Manage user settings"
+                    , icon = Components.Icon.Menu
+                    }
+                    |> (case props.onClick of
+                            Just onClick ->
+                                Components.IconButton.withOnClick onClick
+
+                            Nothing ->
+                                identity
+                       )
+                    |> Components.IconButton.view
+                ]
+    in
+    div
         [ Css.row
-        , Css.gap_16
-        , Css.gap_fill
-        , Css.align_cy
-        , Css.bg_background
-        , Css.border
-        , Css.mw_fill
-        , Css.pad_16
         , Html.Attributes.Extra.attributeIf
             props.isWidthFill
             Css.fill
-        , Css.radius_8
-        , Css.controls
-        , Html.Attributes.Extra.attributeMaybe
-            Html.Events.onClick
-            props.onClick
-        , Attr.attribute "aria-label" "Manage user settings"
         ]
-        [ Components.Avatar.view
-            { label = props.user.name
-            , sublabel = props.user.email
-            , image = props.user.image
-            }
-        , Components.Icon.view24 Components.Icon.Down
+        [ viewDefaultButton
+        , Html.Extra.viewIf
+            props.isResponsive
+            viewMobileButton
         ]

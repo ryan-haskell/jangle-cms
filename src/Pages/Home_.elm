@@ -4,7 +4,9 @@ import Auth
 import Components.Button
 import Components.Dialog
 import Components.EmptyState
+import Components.Field
 import Components.Icon
+import Components.Input
 import Components.Layout
 import Css
 import Effect exposing (Effect)
@@ -41,13 +43,13 @@ page user shared route =
 
 
 type alias Model =
-    { isDialogOpen : Bool
+    { createProjectSearchValue : String
     }
 
 
 init : () -> ( Model, Effect Msg )
 init () =
-    ( { isDialogOpen = False }
+    ( { createProjectSearchValue = "" }
     , Effect.none
     )
 
@@ -58,14 +60,20 @@ init () =
 
 type Msg
     = ClickedCreateFirstProject
+    | ChangedSearchValue String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
         ClickedCreateFirstProject ->
-            ( { model | isDialogOpen = True }
+            ( { model | createProjectSearchValue = "" }
             , Effect.showDialog { id = ids.createProjectDialog }
+            )
+
+        ChangedSearchValue str ->
+            ( { model | createProjectSearchValue = str }
+            , Effect.none
             )
 
 
@@ -107,19 +115,17 @@ view user model =
             { title = "Create a project"
             , content =
                 [ div [ Css.col, Css.gap_16 ]
-                    [ p [ Css.line_140 ]
-                        [ text
-                            ("👋 Hey ${name}! This form isn't quite ready yet..."
-                                |> String.replace "${name}"
-                                    (String.split " " user.name
-                                        |> List.head
-                                        |> Maybe.withDefault user.name
-                                    )
-                            )
-                        ]
-                    , p [ Css.line_140 ]
-                        [ text "Try hitting the ESC key or clicking the \"X\" icon in the top-right corner!"
-                        ]
+                    [ Components.Field.new
+                        { input =
+                            Components.Input.new
+                                { value = model.createProjectSearchValue
+                                }
+                                |> Components.Input.withStyleSearch
+                                |> Components.Input.withOnInput ChangedSearchValue
+                        }
+                        |> Components.Field.withWidthFill
+                        |> Components.Field.withLabel "Find a repository"
+                        |> Components.Field.view
                     ]
                 ]
             }

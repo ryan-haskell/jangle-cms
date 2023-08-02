@@ -77,9 +77,9 @@ view (Dialog props) =
     let
         viewHeader : Html msg
         viewHeader =
-            div [ Css.row, Css.align_top, Css.gap_fill ]
-                [ div [ Css.col, Css.gap_4 ]
-                    [ span [ Css.font_h1 ] [ text props.title ]
+            div [ Css.row, Css.align_top, Css.gap_fill, Css.gap_16 ]
+                [ div [ Css.col, Css.gap_4, Css.overflow_hidden ]
+                    [ span [ Css.font_h1, Css.ellipsis ] [ text props.title ]
                     , Html.Extra.viewMaybe
                         (\subtitle ->
                             span
@@ -117,11 +117,13 @@ view (Dialog props) =
         [ div
             [ Css.bg_background
             , Css.col
+            , Css.mw_fill
             , Css.w_640
             , Css.border
             , Css.radius_16
             , Css.pad_32
             , Css.gap_32
+            , Css.scroll
             ]
             [ viewHeader
             , div [ Css.fill ] props.content

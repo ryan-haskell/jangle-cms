@@ -403,3 +403,31 @@ dialog::backdrop {
 .bg_image { background-position: center; background-size: cover; background-repeat: no-repeat; }
 
 .color_textSecondary { color: var(--color_textSecondary); }
+
+/* Mobile: width < 600px
+   Tablet: 600px < width < 1200px
+   Desktop: 1200px < width 
+ */
+
+.mobile_hide {}
+.tablet_hide {}
+.desktop_hide {}
+.mobile_only {}
+.tablet_only {}
+.desktop_only {}
+
+@media screen and (max-width: 600px) {
+  .mobile_hide { display: none; }
+  .tablet_only { display: none; }
+  .desktop_only { display: none; }
+}
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+  .mobile_only { display: none; }
+  .tablet_hide { display: none; }
+  .desktop_only { display: none; }
+}
+@media screen and (min-width: 1200px) {
+  .mobile_only { display: none; }
+  .tablet_only { display: none; }
+  .desktop_hide { display: none; }
+}
