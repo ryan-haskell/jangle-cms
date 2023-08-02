@@ -99,6 +99,11 @@ type alias Msg =
 update : Route () -> Msg -> Model -> ( Model, Effect Msg )
 update route msg model =
     case msg of
+        Shared.Msg.SignOut ->
+            ( { model | user = Auth.User.NotSignedIn }
+            , Effect.clearOAuthResponse
+            )
+
         Shared.Msg.SupabaseUserApiResponded (Err httpError) ->
             ( { model | user = Auth.User.NotSignedIn }
             , Effect.clearOAuthResponse

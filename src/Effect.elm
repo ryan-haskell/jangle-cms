@@ -7,6 +7,7 @@ port module Effect exposing
     , saveOAuthResponse, clearOAuthResponse
     , fetchSupabaseUser
     , showDialog
+    , signOut
     )
 
 {-|
@@ -23,6 +24,9 @@ port module Effect exposing
 
 @docs saveOAuthResponse, clearOAuthResponse
 @docs fetchSupabaseUser
+@docs showDialog
+
+@docs signOut
 
 -}
 
@@ -164,6 +168,11 @@ type SupabaseRequest
 fetchSupabaseUser : Effect msg
 fetchSupabaseUser =
     Supabase FetchSupabaseUser
+
+
+signOut : Effect msg
+signOut =
+    SendSharedMsg Shared.Msg.SignOut
 
 
 

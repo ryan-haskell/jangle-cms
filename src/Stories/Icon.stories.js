@@ -53,3 +53,6 @@ export const Close = {
 export const Search = {
   args: { icon: 'Search', size: '24px' },
 }
+export const SignOut = {
+  args: { icon: 'SignOut', size: '24px' },
+}

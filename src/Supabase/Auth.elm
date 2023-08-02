@@ -1,6 +1,7 @@
 module Supabase.Auth exposing
     ( User, getUserData
     , GitHubUserMetadata
+    , toGitHubOAuthUrl
     )
 
 {-|
@@ -18,6 +19,7 @@ import Http
 import Json.Decode
 import Json.Encode
 import Supabase.Context exposing (Context)
+import Url.Builder
 
 
 {-| Options when signing in via OAuth:
@@ -174,3 +176,32 @@ fromProviderToString provider =
 
         Zoom ->
             "zoom"
+
+
+toGitHubOAuthUrl :
+    { redirectTo : String
+    , supabaseUrl : String
+    , scopes : List String
+    }
+    -> String
+toGitHubOAuthUrl { redirectTo, supabaseUrl, scopes } =
+    let
+        queryParams : String
+        queryParams =
+            [ Url.Builder.string "provider" "github"
+                |> Just
+            , Url.Builder.string "redirect_to" redirectTo
+                |> Just
+
+            -- https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps
+            , if List.isEmpty scopes then
+                Nothing
+
+              else
+                Url.Builder.string "scopes" (String.join " " scopes)
+                    |> Just
+            ]
+                |> List.filterMap identity
+                |> Url.Builder.toQuery
+    in
+    supabaseUrl ++ "/auth/v1/authorize" ++ queryParams

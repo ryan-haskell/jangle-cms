@@ -8,7 +8,8 @@ export const icons = [
   'Down',
   'Right',
   'Close',
-  'Search'
+  'Search',
+  'SignOut'
 ]
 
 export default {}

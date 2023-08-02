@@ -2,6 +2,7 @@ module Layouts.Header exposing (Model, Msg, Props, layout)
 
 import Auth.User
 import Components.Button
+import Components.Dialog.UserSettings
 import Components.Header
 import Components.Icon
 import Components.Layout
@@ -52,6 +53,7 @@ init _ =
 
 type Msg
     = ClickedUserControls
+    | ClickedSignOut
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -59,7 +61,14 @@ update msg model =
     case msg of
         ClickedUserControls ->
             ( model
-            , Effect.none
+            , Effect.showDialog
+                { id = Components.Dialog.UserSettings.id
+                }
+            )
+
+        ClickedSignOut ->
+            ( model
+            , Effect.signOut
             )
 
 
@@ -96,5 +105,9 @@ view props route { toContentMsg, model, content } =
             }
             |> Components.Layout.withHeader header
             |> Components.Layout.view
+        , Components.Dialog.UserSettings.view
+            { user = props.user
+            , onSignOutClick = toContentMsg ClickedSignOut
+            }
         ]
     }

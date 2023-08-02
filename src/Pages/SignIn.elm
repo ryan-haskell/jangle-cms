@@ -9,6 +9,7 @@ import Html exposing (..)
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Supabase.Auth
 import Url
 import Url.Builder
 import View exposing (View)
@@ -71,19 +72,6 @@ subscriptions model =
 
 view : Shared.Model -> Model -> View Msg
 view shared model =
-    let
-        gitHubOAuthUrl : String
-        gitHubOAuthUrl =
-            let
-                queryParams : String
-                queryParams =
-                    Url.Builder.toQuery
-                        [ Url.Builder.string "provider" "github"
-                        , Url.Builder.string "redirect_to" shared.flags.baseUrl
-                        ]
-            in
-            shared.flags.supabase.url ++ "/auth/v1/authorize" ++ queryParams
-    in
     { title = "Jangle | Sign in"
     , body =
         [ div [ Css.h_fill, Css.col, Css.align_center, Css.gap_16 ]
@@ -91,7 +79,13 @@ view shared model =
             , Components.Button.new { label = "Sign in with GitHub" }
                 |> Components.Button.withStyleSecondary
                 |> Components.Button.withIcon Components.Icon.GitHub
-                |> Components.Button.withHref gitHubOAuthUrl
+                |> Components.Button.withHref
+                    (Supabase.Auth.toGitHubOAuthUrl
+                        { redirectTo = shared.flags.baseUrl
+                        , supabaseUrl = shared.flags.supabase.url
+                        , scopes = []
+                        }
+                    )
                 |> Components.Button.view
             ]
         ]
