@@ -1,8 +1,3 @@
-# 1️⃣ Tells Netlify how to build your app, and where the files are
-[build]
-  command = "npm run build"
-  publish = "dist"
-
 # 2️⃣ Handles SPA redirects so all your pages work
 [[redirects]]
   from = "/*"
