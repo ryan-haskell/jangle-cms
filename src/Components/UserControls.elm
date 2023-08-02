@@ -18,6 +18,7 @@ import Components.Icon
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Html.Events
 
 
@@ -75,19 +76,14 @@ view (UserControls props) =
         , Css.border
         , Css.mw_fill
         , Css.pad_16
-        , if props.isWidthFill then
+        , Html.Attributes.Extra.attributeIf
+            props.isWidthFill
             Css.fill
-
-          else
-            Attr.classList []
         , Css.radius_8
         , Css.controls
-        , case props.onClick of
-            Just onClick ->
-                Html.Events.onClick onClick
-
-            Nothing ->
-                Attr.classList []
+        , Html.Attributes.Extra.attributeMaybe
+            Html.Events.onClick
+            props.onClick
         , Attr.attribute "aria-label" "Manage user settings"
         ]
         [ Components.Avatar.view

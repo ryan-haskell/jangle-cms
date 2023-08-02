@@ -19,7 +19,8 @@ module Components.Field exposing
 import Components.Input
 import Css
 import Html exposing (..)
-import Html.Attributes as Attr
+import Html.Attributes.Extra
+import Html.Extra
 import Svg
 import Svg.Attributes as SvgAttr
 
@@ -89,7 +90,7 @@ view (Field props) =
             in
             case props.label of
                 None ->
-                    text ""
+                    Html.Extra.nothing
 
                 Label label ->
                     viewLabel label
@@ -106,11 +107,8 @@ view (Field props) =
 
         viewError : Html msg
         viewError =
-            case props.error of
-                Nothing ->
-                    text ""
-
-                Just error ->
+            Html.Extra.viewMaybe
+                (\error ->
                     div [ Css.row, Css.align_cy, Css.gap_4, Css.padX_8 ]
                         [ viewErrorIcon
                         , span
@@ -119,14 +117,14 @@ view (Field props) =
                             ]
                             [ text error ]
                         ]
+                )
+                props.error
 
         widthAttr : Html.Attribute msg
         widthAttr =
-            if props.isWidthFill then
+            Html.Attributes.Extra.attributeIf
+                props.isWidthFill
                 Css.w_fill
-
-            else
-                Attr.classList []
 
         viewInput : Html msg
         viewInput =

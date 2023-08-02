@@ -3,6 +3,7 @@ module Components.Avatar exposing (view)
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Attributes.Extra
 
 
 view :
@@ -18,15 +19,14 @@ view props =
             let
                 backgroundImageAttribute : Html.Attribute msg
                 backgroundImageAttribute =
-                    case props.image of
-                        Nothing ->
-                            Attr.classList []
-
-                        Just imageUrl ->
+                    Html.Attributes.Extra.attributeMaybe
+                        (\imageUrl ->
                             Attr.style "background-image"
                                 ("url('${imageUrl}')"
                                     |> String.replace "${imageUrl}" imageUrl
                                 )
+                        )
+                        props.image
             in
             div
                 [ Css.shrink_none

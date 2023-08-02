@@ -4,7 +4,7 @@ import Components.Field
 import Components.Input
 import Css
 import Html exposing (..)
-import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Json.Decode
 import Storybook.Component
 import Storybook.Controls
@@ -137,11 +137,9 @@ view controls model =
                 field
     in
     div
-        [ if controls.isWidthFill then
+        [ Html.Attributes.Extra.attributeIf
+            controls.isWidthFill
             Css.w_640
-
-          else
-            Attr.classList []
         ]
         [ Components.Field.new { input = input }
             |> Components.Field.withErrorMessage

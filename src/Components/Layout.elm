@@ -19,7 +19,8 @@ import Components.Icon exposing (Icon)
 import Components.Sidebar
 import Css
 import Html exposing (..)
-import Html.Attributes as Attr
+import Html.Attributes.Extra
+import Html.Extra
 import Route.Path exposing (Path)
 
 
@@ -67,28 +68,20 @@ withSidebar sidebar (Layout props) =
 view : Layout msg -> Html msg
 view (Layout props) =
     div [ Css.row, Css.h_fill, Css.shrink_none ]
-        [ case props.sidebar of
-            Just sidebar ->
-                Components.Sidebar.view sidebar
-
-            Nothing ->
-                text ""
+        [ Html.Extra.viewMaybe
+            Components.Sidebar.view
+            props.sidebar
         , main_ [ Css.col, Css.align_cx, Css.fill, Css.scroll ]
-            [ case props.header of
-                Just header ->
-                    Components.Header.view header
-
-                Nothing ->
-                    text ""
+            [ Html.Extra.viewMaybe
+                Components.Header.view
+                props.header
             , div
                 [ Css.w_fill
                 , Css.col
                 , Css.fill
-                , if props.isContentCentered then
+                , Html.Attributes.Extra.attributeIf
+                    props.isContentCentered
                     Css.mw_1200
-
-                  else
-                    Attr.classList []
                 ]
                 props.content
             ]

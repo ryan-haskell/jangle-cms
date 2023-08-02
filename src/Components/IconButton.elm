@@ -17,6 +17,7 @@ import Components.Icon exposing (Icon)
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Html.Events
 
 
@@ -51,12 +52,9 @@ view (IconButton props) =
         , Css.bg_background
         , Css.controls
         , Attr.attribute "aria-label" props.label
-        , case props.onClick of
-            Just onClick ->
-                Html.Events.onClick onClick
-
-            Nothing ->
-                Attr.classList []
+        , Html.Attributes.Extra.attributeMaybe
+            Html.Events.onClick
+            props.onClick
         ]
         [ Components.Icon.view16 props.icon
         ]

@@ -22,7 +22,9 @@ import Components.Icon exposing (Icon)
 import Css
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Html.Events
+import Html.Extra
 
 
 
@@ -101,24 +103,16 @@ view : Button msg -> Html msg
 view (Button props) =
     viewElement props.onClick
         [ Css.button
-        , if props.style == Secondary then
+        , Html.Attributes.Extra.attributeIf
+            (props.style == Secondary)
             Css.button__secondary
-
-          else
-            Attr.classList []
-        , case props.id of
-            Just id ->
-                Attr.id id
-
-            Nothing ->
-                Attr.classList []
+        , Html.Attributes.Extra.attributeMaybe
+            Attr.id
+            props.id
         ]
-        [ case props.icon of
-            Just icon ->
-                Components.Icon.view16 icon
-
-            Nothing ->
-                Html.text ""
+        [ Html.Extra.viewMaybe
+            Components.Icon.view16
+            props.icon
         , Html.span [] [ Html.text props.label ]
         ]
 

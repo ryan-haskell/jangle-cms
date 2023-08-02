@@ -23,6 +23,7 @@ import Components.Icon
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Html.Events
 
 
@@ -83,28 +84,21 @@ view (Input props) =
     let
         onInputAttribute : Html.Attribute msg
         onInputAttribute =
-            case props.onInput of
-                Nothing ->
-                    Attr.classList []
-
-                Just onInput ->
-                    Html.Events.onInput onInput
+            Html.Attributes.Extra.attributeMaybe
+                Html.Events.onInput
+                props.onInput
 
         errorAttribute : Html.Attribute msg
         errorAttribute =
-            if props.hasError then
+            Html.Attributes.Extra.attributeIf
+                props.hasError
                 Css.input__error
-
-            else
-                Attr.classList []
 
         widthAttr : Html.Attribute msg
         widthAttr =
-            if props.isWidthFill then
+            Html.Attributes.Extra.attributeIf
+                props.isWidthFill
                 Css.w_fill
-
-            else
-                Attr.classList []
     in
     case props.style of
         Text ->

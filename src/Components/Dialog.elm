@@ -21,7 +21,9 @@ import Components.IconButton
 import Css
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Html.Events
+import Html.Extra
 import Json.Decode
 
 
@@ -78,16 +80,15 @@ view (Dialog props) =
             div [ Css.row, Css.align_top, Css.gap_fill ]
                 [ div [ Css.col, Css.gap_4 ]
                     [ span [ Css.font_h1 ] [ text props.title ]
-                    , case props.subtitle of
-                        Just subtitle ->
+                    , Html.Extra.viewMaybe
+                        (\subtitle ->
                             span
                                 [ Css.font_sublabel
                                 , Css.color_textSecondary
                                 ]
                                 [ text subtitle ]
-
-                        Nothing ->
-                            text ""
+                        )
+                        props.subtitle
                     ]
                 , viewCloseButton
                 ]
@@ -109,12 +110,9 @@ view (Dialog props) =
 
             OpenedByShowModal { id } ->
                 Attr.id id
-        , case props.onClose of
-            Just onClose ->
-                Html.Events.on "close" (Json.Decode.succeed onClose)
-
-            Nothing ->
-                Attr.classList []
+        , Html.Attributes.Extra.attributeMaybe
+            (Html.Events.on "close" << Json.Decode.succeed)
+            props.onClose
         ]
         [ div
             [ Css.bg_background

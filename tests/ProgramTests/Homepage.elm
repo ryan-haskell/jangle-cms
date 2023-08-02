@@ -1,7 +1,6 @@
 module ProgramTests.Homepage exposing (..)
 
 import Effect exposing (Effect)
-import Html.Attributes as Attr
 import Json.Encode
 import Pages.Home_ exposing (Model, Msg)
 import ProgramTest exposing (ProgramTest)

@@ -15,7 +15,7 @@ module Components.SidebarLink exposing
 import Components.Icon exposing (Icon)
 import Css
 import Html exposing (..)
-import Html.Attributes as Attr
+import Html.Attributes.Extra
 import Route.Path exposing (Path)
 
 
@@ -61,18 +61,13 @@ view (SidebarLink props) =
         , Css.gap_8
         , Css.align_left
         , Css.align_cy
-        , case props.path of
-            Nothing ->
-                Attr.classList []
-
-            Just path ->
-                Route.Path.href path
+        , Html.Attributes.Extra.attributeMaybe
+            Route.Path.href
+            props.path
         , Css.sidebar_link
-        , if props.isSelected then
+        , Html.Attributes.Extra.attributeIf
+            props.isSelected
             Css.sidebar_link__selected
-
-          else
-            Attr.classList []
         ]
         [ Components.Icon.view16 props.icon
         , span

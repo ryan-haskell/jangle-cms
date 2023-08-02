@@ -15,6 +15,7 @@ module Components.Header exposing
 import Components.UserControls
 import Css
 import Html exposing (..)
+import Html.Extra
 
 
 type Header msg
@@ -46,12 +47,9 @@ view (Header props) =
 
         viewUserControls : Html msg
         viewUserControls =
-            case props.userControls of
-                Nothing ->
-                    text ""
-
-                Just userControls ->
-                    Components.UserControls.view userControls
+            Html.Extra.viewMaybe
+                Components.UserControls.view
+                props.userControls
     in
     header
         [ Css.row

@@ -17,7 +17,6 @@ import Components.SidebarLinkGroup
 import Components.UserControls
 import Css
 import Html exposing (..)
-import Html.Attributes as Attr
 import Route.Path exposing (Path)
 
 
