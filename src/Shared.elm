@@ -132,10 +132,12 @@ update route msg model =
                     , email = user.email
                     , image = user.github |> Maybe.andThen .avatar_url
                     , supabaseToken = response.supabaseToken
-                    , githubToken = response.githubToken
-                    , githubUsername =
-                        user.github
-                            |> Maybe.map .username
+                    , github =
+                        Maybe.map2 Auth.User.GitHubInfo
+                            response.githubToken
+                            (user.github
+                                |> Maybe.map .username
+                            )
                     }
             in
             case model.user of
@@ -161,7 +163,7 @@ update route msg model =
                             Auth.User.SignedIn
                                 (toUser
                                     { supabaseToken = oldUser.supabaseToken
-                                    , githubToken = oldUser.githubToken
+                                    , githubToken = oldUser.github |> Maybe.map .token
                                     }
                                 )
                       }

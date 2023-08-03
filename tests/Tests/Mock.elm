@@ -10,6 +10,9 @@ user =
     , email = "ryan@jangle.io"
     , image = Nothing
     , supabaseToken = "supabase_123"
-    , githubToken = Just "github_123"
-    , githubUsername = Just "ryannhg"
+    , github =
+        Just
+            { token = "github_123"
+            , username = "ryannhg"
+            }
     }

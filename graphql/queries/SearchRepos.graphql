@@ -1,10 +1,11 @@
-query SearchRepositories($searchQuery: String!) {
+query SearchRepos($searchQuery: String!) {
   search(
     first: 10
     type: REPOSITORY
     query: $searchQuery
   ) {
     nodes {
+      __typename
       ... on Repository {
         databaseId
         nameWithOwner

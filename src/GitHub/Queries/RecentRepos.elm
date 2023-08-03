@@ -53,7 +53,7 @@ new input =
             repositories(
               first: 10
               affiliations: [OWNER]
-              orderBy: {field: UPDATED_AT, direction: DESC}
+              orderBy: { field: UPDATED_AT, direction: DESC }
             ) {
               nodes {
                 databaseId

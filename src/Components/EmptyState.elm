@@ -1,8 +1,14 @@
-module Components.EmptyState exposing (viewCreateYourFirstProject)
+module Components.EmptyState exposing
+    ( viewCreateYourFirstProject
+    , viewHttpError
+    , viewLoading
+    , viewNoResultsFound
+    )
 
 import Components.Button
 import Css
 import Html exposing (..)
+import Http
 import Svg
 import Svg.Attributes
 
@@ -67,6 +73,61 @@ viewEmptyStateWithOptions props =
             |> Components.Button.withId props.button.id
             |> Components.Button.view
         ]
+
+
+viewLoading : Html msg
+viewLoading =
+    span
+        [ Css.font_sublabel
+        , Css.color_textSecondary
+        , Css.h_180
+        , Css.row
+        , Css.align_center
+        ]
+        [ text "Loading..." ]
+
+
+viewNoResultsFound : String -> Html msg
+viewNoResultsFound message =
+    span
+        [ Css.font_sublabel
+        , Css.color_textSecondary
+        , Css.h_180
+        , Css.row
+        , Css.align_center
+        ]
+        [ text message ]
+
+
+viewHttpError : Http.Error -> Html msg
+viewHttpError httpError =
+    let
+        message : String
+        message =
+            case httpError of
+                Http.BadBody _ ->
+                    "Got an unexpected API response"
+
+                Http.Timeout ->
+                    "Request timed out"
+
+                Http.NetworkError ->
+                    "Could not connect to the API"
+
+                Http.BadStatus code ->
+                    "Got status code " ++ String.fromInt code
+
+                Http.BadUrl _ ->
+                    "This request had an invalid URL"
+    in
+    span
+        [ Css.font_sublabel
+        , Css.color_textSecondary
+        , Css.h_180
+        , Css.row
+        , Css.align_center
+        ]
+        [ text message ]
 
 
 viewWindAndLeavesSvg : Svg.Svg msg

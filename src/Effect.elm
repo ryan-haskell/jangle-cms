@@ -4,6 +4,7 @@ port module Effect exposing
     , sendCmd, sendMsg
     , pushRoute, replaceRoute, loadExternalUrl
     , map, toCmd
+    , sendDelayedMsg
     , saveOAuthResponse, clearOAuthResponse
     , fetchSupabaseUser
     , showDialog
@@ -23,6 +24,7 @@ port module Effect exposing
 
 ## Custom effects
 
+@docs sendDelayedMsg
 @docs saveOAuthResponse, clearOAuthResponse
 @docs fetchSupabaseUser
 @docs showDialog
@@ -43,6 +45,7 @@ import GraphQL.Http
 import Http
 import Json.Decode
 import Json.Encode
+import Process
 import Route exposing (Route)
 import Route.Path
 import Shared.Model
@@ -108,6 +111,14 @@ sendCmd =
 sendMsg : msg -> Effect msg
 sendMsg msg =
     Task.succeed msg
+        |> Task.perform identity
+        |> SendCmd
+
+
+sendDelayedMsg : Int -> msg -> Effect msg
+sendDelayedMsg delayInMs msg =
+    Process.sleep (Basics.toFloat delayInMs)
+        |> Task.map (\_ -> msg)
         |> Task.perform identity
         |> SendCmd
 
@@ -401,7 +412,13 @@ toCmd options effect =
                     sendHttpRequest { token = response.providerToken }
 
                 Auth.User.SignedIn user ->
-                    sendHttpRequest { token = user.githubToken |> Maybe.withDefault "TODO" }
+                    case user.github of
+                        Just githubInfo ->
+                            sendHttpRequest { token = githubInfo.token }
+
+                        Nothing ->
+                            -- TODO: Report to Sentry
+                            Cmd.none
 
 
 

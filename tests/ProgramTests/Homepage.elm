@@ -19,8 +19,8 @@ import Tests.Mock
 start : ProgramTest Model Msg (Effect Msg)
 start =
     ProgramTest.createDocument
-        { init = Pages.Home_.init
-        , update = Pages.Home_.update
+        { init = Pages.Home_.init Tests.Mock.user
+        , update = Pages.Home_.update Tests.Mock.user
         , view = Pages.Home_.view Tests.Mock.user
         }
         |> ProgramTest.start ()
