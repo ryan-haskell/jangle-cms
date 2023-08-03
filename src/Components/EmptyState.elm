@@ -77,26 +77,45 @@ viewEmptyStateWithOptions props =
 
 viewLoading : Html msg
 viewLoading =
-    span
-        [ Css.font_sublabel
-        , Css.color_textSecondary
+    viewPlaceholderMessage
+        { viewIcon =
+            div [ Css.spinner ]
+                [ div [] []
+                , div [] []
+                , div [] []
+                , div [] []
+                ]
+        , message = "Loading..."
+        }
+
+
+viewPlaceholderMessage :
+    { viewIcon : Html msg
+    , message : String
+    }
+    -> Html msg
+viewPlaceholderMessage props =
+    div
+        [ Css.row
+        , Css.gap_8
         , Css.h_180
-        , Css.row
         , Css.align_center
         ]
-        [ text "Loading..." ]
+        [ props.viewIcon
+        , span
+            [ Css.font_sublabel
+            , Css.color_textSecondary
+            ]
+            [ text props.message ]
+        ]
 
 
 viewNoResultsFound : String -> Html msg
 viewNoResultsFound message =
-    span
-        [ Css.font_sublabel
-        , Css.color_textSecondary
-        , Css.h_180
-        , Css.row
-        , Css.align_center
-        ]
-        [ text message ]
+    viewPlaceholderMessage
+        { viewIcon = viewErrorTriangle12px
+        , message = message
+        }
 
 
 viewHttpError : Http.Error -> Html msg
@@ -120,14 +139,10 @@ viewHttpError httpError =
                 Http.BadUrl _ ->
                     "This request had an invalid URL"
     in
-    span
-        [ Css.font_sublabel
-        , Css.color_textSecondary
-        , Css.h_180
-        , Css.row
-        , Css.align_center
-        ]
-        [ text message ]
+    viewPlaceholderMessage
+        { viewIcon = viewErrorTriangle12px
+        , message = message
+        }
 
 
 viewWindAndLeavesSvg : Svg.Svg msg
@@ -213,6 +228,21 @@ viewWindAndLeavesSvg =
             , Svg.Attributes.clipRule "evenodd"
             , Svg.Attributes.d "M188.044 186.468C198.274 191.021 210.728 205.916 215.588 222.54C215.876 223.533 216.919 224.108 217.913 223.815C218.906 223.526 219.476 222.483 219.184 221.49C213.99 203.711 200.509 187.908 189.566 183.041C188.621 182.621 187.511 183.045 187.091 183.99C186.671 184.938 187.095 186.045 188.044 186.468Z"
             , Svg.Attributes.fill "var(--color_textSecondary)"
+            ]
+            []
+        ]
+
+
+viewErrorTriangle12px : Html msg
+viewErrorTriangle12px =
+    Svg.svg
+        [ Svg.Attributes.viewBox "0 0 12 12"
+        , Svg.Attributes.width "12"
+        , Svg.Attributes.height "12"
+        ]
+        [ Svg.path
+            [ Svg.Attributes.d "M4.855.708c.5-.896 1.79-.896 2.29 0l4.675 8.351a1.312 1.312 0 0 1-1.146 1.954H1.33A1.313 1.313 0 0 1 .183 9.058ZM7 7V3H5v4Zm-1 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+            , Svg.Attributes.fill "currentColor"
             ]
             []
         ]

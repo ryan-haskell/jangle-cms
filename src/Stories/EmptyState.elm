@@ -2,6 +2,7 @@ module Stories.EmptyState exposing (main)
 
 import Components.EmptyState
 import Html exposing (Html)
+import Http
 import Json.Decode
 import Storybook.Component
 import Storybook.Controls
@@ -20,6 +21,15 @@ decoder =
             , options =
                 [ ( "CreateYourFirstProject"
                   , viewCreateYourFirstProject
+                  )
+                , ( "Loading"
+                  , Components.EmptyState.viewLoading
+                  )
+                , ( "HttpError"
+                  , Components.EmptyState.viewHttpError Http.NetworkError
+                  )
+                , ( "NoResultsFound"
+                  , Components.EmptyState.viewNoResultsFound "No repositories found matching your search"
                   )
                 ]
             }
