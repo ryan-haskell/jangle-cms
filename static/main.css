@@ -26,6 +26,7 @@
   --weight_600: 600;
   --weight_800: 800;
 
+  --px_1: 1px;
   --px_4: 0.25rem;
   --px_8: 0.5rem;
   --px_12: 0.75rem;
@@ -36,6 +37,7 @@
   --px_40: 2.5rem;
   --px_48: 3rem;
   --px_96: 6rem;
+  --px_180: 11.25rem;
   --px_240: 15rem;
   --px_320: 20rem;
   --px_640: 40rem;
@@ -288,6 +290,7 @@ dialog::backdrop {
 
 .align_center { justify-content: center; align-items: center; }
 
+.gap_1 { gap: var(--px_1); }
 .gap_4 { gap: var(--px_4); }
 .gap_8 { gap: var(--px_8); }
 .gap_12 { gap: var(--px_12); }
@@ -353,6 +356,7 @@ dialog::backdrop {
 .h_32 { height: var(--px_32); }
 .h_40 { height: var(--px_40); }
 .h_96 { height: var(--px_96); }
+.h_180 { height: var(--px_180); }
 .h_fill { height: 100%; }
 
 .fill { flex-grow: 1; }
@@ -400,6 +404,7 @@ dialog::backdrop {
 
 .bg_navbar { background-color: var(--color_navbarBackground); }
 .bg_background { background-color: var(--color_background); }
+.bg_border { background-color: var(--color_border); }
 .bg_image { background-position: center; background-size: cover; background-repeat: no-repeat; }
 
 .color_textSecondary { color: var(--color_textSecondary); }
