@@ -1,0 +1,14 @@
+query RecentRepos($username: String!) {
+  user(login: $username) {
+    repositories(
+      first: 10
+      affiliations: [OWNER]
+      orderBy: {field: UPDATED_AT, direction: DESC}
+    ) {
+      nodes {
+        databaseId
+        nameWithOwner
+      }
+    }
+  }
+}

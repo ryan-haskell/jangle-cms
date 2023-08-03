@@ -15,7 +15,8 @@
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
             "elm-community/html-extra": "3.4.0",
-            "elm-community/string-extra": "4.0.1"
+            "elm-community/string-extra": "4.0.1",
+            "ryannhg/graphql": "1.0.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",

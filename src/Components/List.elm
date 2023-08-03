@@ -1,4 +1,4 @@
-module Components.List exposing (view)
+module Components.List exposing (Item, view)
 
 import Components.Icon
 import Css
@@ -6,7 +6,17 @@ import Html exposing (..)
 import Html.Events
 
 
-view : { items : List (Item msg) } -> Html msg
+type alias Item msg =
+    { icon : Components.Icon.Icon
+    , label : String
+    , onClick : msg
+    }
+
+
+view :
+    { items : List (Item msg)
+    }
+    -> Html msg
 view props =
     let
         viewItem : Item msg -> Html msg
@@ -42,10 +52,3 @@ view props =
             ]
             (List.map viewItem props.items)
         ]
-
-
-type alias Item msg =
-    { icon : Components.Icon.Icon
-    , label : String
-    , onClick : msg
-    }

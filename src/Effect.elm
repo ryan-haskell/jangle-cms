@@ -8,6 +8,7 @@ port module Effect exposing
     , fetchSupabaseUser
     , showDialog
     , signOut
+    , sendGitHubGraphQL
     )
 
 {-|
@@ -28,11 +29,19 @@ port module Effect exposing
 
 @docs signOut
 
+@docs sendGitHubGraphQL
+
 -}
 
 import Auth.User
 import Browser.Navigation
 import Dict exposing (Dict)
+import GitHub.Operation
+import GraphQL.Decode
+import GraphQL.Encode
+import GraphQL.Http
+import Http
+import Json.Decode
 import Json.Encode
 import Route exposing (Route)
 import Route.Path
@@ -65,6 +74,8 @@ type Effect msg
     | Supabase SupabaseRequest
       -- DIALOGS
     | ShowDialog { id : String }
+      -- GRAPHQL CALLS
+    | SendGitHubGraphQL (Operation msg)
 
 
 
@@ -185,6 +196,27 @@ showDialog { id } =
 
 
 
+-- GITHUB GRAPHQL
+
+
+sendGitHubGraphQL :
+    { operation : GitHub.Operation.Operation value
+    , onResponse : Result Http.Error value -> msg
+    }
+    -> Effect msg
+sendGitHubGraphQL ({ operation } as options) =
+    SendGitHubGraphQL
+        { name = operation.name
+        , query = operation.query
+        , variables = operation.variables
+        , decoder =
+            operation.decoder
+                |> mapGraphQLDecoder (\value -> options.onResponse (Ok value))
+        , onHttpError = Err >> options.onResponse
+        }
+
+
+
 -- INTERNALS
 
 
@@ -223,6 +255,9 @@ map fn effect =
 
         ShowDialog data ->
             ShowDialog data
+
+        SendGitHubGraphQL operation ->
+            SendGitHubGraphQL (mapOperation fn operation)
 
 
 {-| Elm Land depends on this function to perform your effects.
@@ -323,9 +358,93 @@ toCmd options effect =
                         ]
                 }
 
+        SendGitHubGraphQL operation ->
+            let
+                sendHttpRequest : { token : String } -> Cmd msg
+                sendHttpRequest user =
+                    Http.request
+                        { method = "POST"
+                        , headers =
+                            [ Http.header
+                                "Authorization"
+                                ("Bearer " ++ user.token)
+                            ]
+                        , url = "https://api.github.com/graphql"
+                        , body =
+                            GraphQL.Http.body
+                                { operationName = Just operation.name
+                                , query = operation.query
+                                , variables = operation.variables
+                                }
+                        , expect =
+                            GraphQL.Http.expect
+                                (\result ->
+                                    case result of
+                                        Ok msg ->
+                                            msg
+
+                                        Err httpError ->
+                                            operation.onHttpError httpError
+                                )
+                                operation.decoder
+                        , timeout = Nothing
+                        , tracker = Nothing
+                        }
+            in
+            case options.shared.user of
+                Auth.User.NotSignedIn ->
+                    Route.Path.SignIn
+                        |> Route.Path.toString
+                        |> Browser.Navigation.pushUrl options.key
+
+                Auth.User.FetchingUserDetails response ->
+                    sendHttpRequest { token = response.providerToken }
+
+                Auth.User.SignedIn user ->
+                    sendHttpRequest { token = user.githubToken |> Maybe.withDefault "TODO" }
+
+
+
+-- PORTS
+
 
 port outgoing :
     { tag : String
     , data : Json.Encode.Value
     }
     -> Cmd msg
+
+
+
+-- GRAPHQL THINGS
+
+
+type alias Operation msg =
+    { name : String
+    , query : String
+    , variables : List ( String, GraphQL.Encode.Value )
+    , decoder : GraphQL.Decode.Decoder msg
+    , onHttpError : Http.Error -> msg
+    }
+
+
+mapOperation : (msg1 -> msg2) -> Operation msg1 -> Operation msg2
+mapOperation fn operation =
+    { name = operation.name
+    , query = operation.query
+    , variables = operation.variables
+    , decoder = mapGraphQLDecoder fn operation.decoder
+    , onHttpError = fn << operation.onHttpError
+    }
+
+
+mapGraphQLDecoder :
+    (msg1 -> msg2)
+    -> GraphQL.Decode.Decoder msg1
+    -> GraphQL.Decode.Decoder msg2
+mapGraphQLDecoder fn decoder =
+    -- NOTE TO SELF: Expose `GraphQL.Decode.map` like a normal person.
+    decoder
+        |> GraphQL.Decode.toJsonDecoder
+        |> Json.Decode.map fn
+        |> GraphQL.Decode.scalar

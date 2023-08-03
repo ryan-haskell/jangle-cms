@@ -8,11 +8,17 @@ import Components.Field
 import Components.Icon
 import Components.Input
 import Components.Layout
+import Components.List
 import Css
 import Effect exposing (Effect)
+import GitHub.Queries.RecentRepos
+import GitHub.Queries.RecentRepos.Input
+import GitHub.Relay
+import GitHub.Response
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events
+import Http
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
@@ -24,7 +30,7 @@ import View exposing (View)
 page : Auth.User -> Shared.Model -> Route () -> Page Model Msg
 page user shared route =
     Page.new
-        { init = init
+        { init = init user
         , update = update
         , subscriptions = subscriptions
         , view = view user
@@ -44,13 +50,36 @@ page user shared route =
 
 type alias Model =
     { createProjectSearchValue : String
+    , repos : GitHub.Response.Response (List Repo)
     }
 
 
-init : () -> ( Model, Effect Msg )
-init () =
-    ( { createProjectSearchValue = "" }
-    , Effect.none
+type alias Repo =
+    GitHub.Queries.RecentRepos.Repository
+
+
+init : Auth.User -> () -> ( Model, Effect Msg )
+init user () =
+    ( { createProjectSearchValue = ""
+      , repos = GitHub.Response.Loading
+      }
+    , case user.githubUsername of
+        Just username ->
+            Effect.sendGitHubGraphQL
+                { operation =
+                    let
+                        input : GitHub.Queries.RecentRepos.Input
+                        input =
+                            GitHub.Queries.RecentRepos.Input.new
+                                |> GitHub.Queries.RecentRepos.Input.username username
+                    in
+                    GitHub.Queries.RecentRepos.new input
+                , onResponse = FetchedRecentRepos username
+                }
+
+        Nothing ->
+            -- TODO: Report to Sentry
+            Effect.none
     )
 
 
@@ -61,6 +90,8 @@ init () =
 type Msg
     = ClickedCreateFirstProject
     | ChangedSearchValue String
+    | SelectedRepo Repo
+    | FetchedRecentRepos String (Result Http.Error GitHub.Queries.RecentRepos.Data)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -74,6 +105,33 @@ update msg model =
         ChangedSearchValue str ->
             ( { model | createProjectSearchValue = str }
             , Effect.none
+            )
+
+        SelectedRepo repo ->
+            ( model
+            , Effect.none
+            )
+
+        FetchedRecentRepos username (Ok data) ->
+            ( { model
+                | repos =
+                    case data.user of
+                        Nothing ->
+                            GitHub.Response.Failure (Http.BadBody ("Couldn't find user: " ++ username))
+
+                        Just user ->
+                            user.repositories
+                                |> GitHub.Relay.toNodes
+                                |> GitHub.Response.Success
+              }
+            , Effect.none
+              -- TODO: Report to Sentry
+            )
+
+        FetchedRecentRepos username (Err httpError) ->
+            ( { model | repos = GitHub.Response.Failure httpError }
+            , Effect.none
+              -- TODO: Report to Sentry
             )
 
 
@@ -126,6 +184,18 @@ view user model =
                         |> Components.Field.withWidthFill
                         |> Components.Field.withLabel "Find a repository"
                         |> Components.Field.view
+                    , Components.List.view
+                        { items =
+                            case model.repos of
+                                GitHub.Response.Loading ->
+                                    []
+
+                                GitHub.Response.Failure _ ->
+                                    []
+
+                                GitHub.Response.Success repos ->
+                                    List.map toListItem repos
+                        }
                     ]
                 ]
             }
@@ -133,4 +203,12 @@ view user model =
             |> Components.Dialog.withId ids.createProjectDialog
             |> Components.Dialog.view
         ]
+    }
+
+
+toListItem : Repo -> Components.List.Item Msg
+toListItem repo =
+    { icon = Components.Icon.GitHub
+    , label = repo.nameWithOwner
+    , onClick = SelectedRepo repo
     }
