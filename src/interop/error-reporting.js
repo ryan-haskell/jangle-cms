@@ -17,56 +17,53 @@ export const init = ({ env }) => {
   });
 }
 
-// // Listen for errors from Elm, and report them to Sentry
-// export const handlePorts = (ports) => {
-//   ports.outgoing.subscribe(({ tag, data }) => {
-//     switch (tag) {
-//       case 'SEND_HTTP_ERROR':
-//         return sendHttpError(data)
-//       case 'SEND_JSON_DECODE_ERROR':
-//         return sendJsonDecodeError(data)
-//     }
-//   })
-// }
+export const sendHttpError = (event) => {
+  Sentry.withScope((scope) => {
+    if (event.response) {
+      scope.addAttachment({
+        filename: event.url,
+        data: event.response
+      })
+    }
+    Sentry.captureEvent({
+      message: `${event.method} ${event.url} – ${event.error}`,
+      tags: {
+        'kind': 'Http.Error',
+        'elm.http.method': event.method,
+        'elm.http.url': event.url,
+      }
+    })
+  })
+}
 
-// const sendHttpError = (event) => {
-//   Sentry.withScope((scope) => {
-//     if (event.response) {
-//       scope.addAttachment({
-//         filename: event.url,
-//         data: event.response
-//       })
-//     }
-//     Sentry.captureEvent({
-//       message: `${event.method} ${event.url} – ${event.error}`,
-//       tags: {
-//         'kind': 'Http.Error',
-//         'elm.http.method': event.method,
-//         'elm.http.url': event.url,
-//       }
-//     })
-//   })
-// }
+export const sendJsonDecodeError = (event) => {
+  Sentry.withScope((scope) => {
+    scope.addAttachment({
+      filename:
+        (event.url.endsWith('.json'))
+          ? event.url
+          : `${event.url}.json`,
+      data: event.response
+    })
+    Sentry.captureEvent({
+      message: `${event.method} ${event.url} – ${event.title}`,
+      tags: {
+        'kind': 'Json.Decode.Error',
+        'elm.http.method': event.method,
+        'elm.http.url': event.url,
+      },
+      extra: {
+        "Json.Decode.Error": event.error
+      }
+    })
+  })
+}
 
-// const sendJsonDecodeError = (event) => {
-//   Sentry.withScope((scope) => {
-//     scope.addAttachment({
-//       filename:
-//         (event.url.endsWith('.json'))
-//           ? event.url
-//           : `${event.url}.json`,
-//       data: event.response
-//     })
-//     Sentry.captureEvent({
-//       message: `${event.method} ${event.url} – ${event.title}`,
-//       tags: {
-//         'kind': 'Json.Decode.Error',
-//         'elm.http.method': event.method,
-//         'elm.http.url': event.url,
-//       },
-//       extra: {
-//         "Json.Decode.Error": event.error
-//       }
-//     })
-//   })
-// }
+export const sendCustomError = (event) => {
+  Sentry.captureEvent({
+    tags: { 'kind': 'Elm Error' },
+    message: event.message,
+    extra: event.details
+  })
+
+}

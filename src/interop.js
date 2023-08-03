@@ -37,6 +37,12 @@ export const onReady = ({ app, env }) => {
             dialog.showModal()
           }
           break
+        case 'SENTRY_REPORT_HTTP_ERROR':
+          return ErrorReporting.sendHttpError(data)
+        case 'SENTRY_REPORT_JSON_ERROR':
+          return ErrorReporting.sendJsonDecodeError(data)
+        case 'SENTRY_REPORT_CUSTOM_ERROR':
+          return ErrorReporting.sendCustomError(data)
       }
     })
   }

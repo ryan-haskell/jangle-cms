@@ -23,6 +23,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events
 import Http
+import Json.Encode
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
@@ -84,8 +85,10 @@ init user () =
                 }
 
         Nothing ->
-            -- TODO: Report to Sentry
-            Effect.none
+            Effect.sendCustomErrorToSentry
+                { message = "Could not fetch recent repos, because user was missing"
+                , details = []
+                }
     )
 
 
@@ -157,27 +160,35 @@ update user msg model =
             )
 
         FetchedRecentRepos username (Ok data) ->
-            ( { model
-                | recentRepos =
-                    case data.user of
-                        Nothing ->
+            case data.user of
+                Nothing ->
+                    ( { model
+                        | recentRepos =
                             ("Couldn't find user: " ++ username)
                                 |> Http.BadBody
                                 |> GitHub.Response.Failure
+                      }
+                    , Effect.sendCustomErrorToSentry
+                        { message = "GitHub could not find user"
+                        , details =
+                            [ ( "username", Json.Encode.string username )
+                            ]
+                        }
+                    )
 
-                        Just user_ ->
+                Just user_ ->
+                    ( { model
+                        | recentRepos =
                             user_.repositories
                                 |> GitHub.Relay.toNodes
                                 |> GitHub.Response.Success
-              }
-            , Effect.none
-              -- TODO: Report to Sentry
-            )
+                      }
+                    , Effect.none
+                    )
 
         FetchedRecentRepos username (Err httpError) ->
             ( { model | recentRepos = GitHub.Response.Failure httpError }
             , Effect.none
-              -- TODO: Report to Sentry
             )
 
         FetchedSearchRepos (Ok data) ->
@@ -207,8 +218,7 @@ update user msg model =
                         |> GitHub.Response.Failure
                         |> Just
               }
-            , -- TODO: Report to Sentry
-              Effect.none
+            , Effect.none
             )
 
 

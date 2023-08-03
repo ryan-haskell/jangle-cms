@@ -5,10 +5,10 @@ port module Effect exposing
     , pushRoute, replaceRoute, loadExternalUrl
     , map, toCmd
     , sendDelayedMsg
+    , signIn, signOut
     , saveOAuthResponse, clearOAuthResponse
-    , fetchSupabaseUser
     , showDialog
-    , signOut
+    , sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
     , sendGitHubGraphQL
     )
 
@@ -25,11 +25,13 @@ port module Effect exposing
 ## Custom effects
 
 @docs sendDelayedMsg
+
+@docs signIn, signOut
 @docs saveOAuthResponse, clearOAuthResponse
-@docs fetchSupabaseUser
+
 @docs showDialog
 
-@docs signOut
+@docs sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
 
 @docs sendGitHubGraphQL
 
@@ -73,12 +75,43 @@ type Effect msg
         { key : String
         , value : Json.Encode.Value
         }
+      -- HTTP
+    | SendHttpRequest (HttpRequest msg)
       -- SUPABASE
     | Supabase SupabaseRequest
       -- DIALOGS
     | ShowDialog { id : String }
       -- GRAPHQL CALLS
     | SendGitHubGraphQL (Operation msg)
+      -- SENTRY ERROR REPORTING
+    | SendHttpErrorToSentry
+        { method : String
+        , url : String
+        , response : Maybe String
+        , error : Http.Error
+        }
+    | SendJsonErrorToSentry
+        { method : String
+        , url : String
+        , response : String
+        , error : Json.Decode.Error
+        }
+    | SendCustomErrorToSentry
+        { message : String
+        , details : List ( String, Json.Encode.Value )
+        }
+
+
+type alias HttpRequest msg =
+    { method : String
+    , url : String
+    , headers : List Http.Header
+    , body : Http.Body
+    , timeout : Maybe Float
+    , tracker : Maybe String
+    , decoder : Json.Decode.Decoder msg
+    , onHttpError : Http.Error -> msg
+    }
 
 
 
@@ -180,16 +213,55 @@ clearOAuthResponse =
 
 
 
+-- HTTP
+
+
+{-| Send an HTTP get request, with error reporting built-in!
+-}
+sendHttpRequest :
+    { method : String
+    , url : String
+    , headers : List Http.Header
+    , body : Http.Body
+    , timeout : Maybe Float
+    , tracker : Maybe String
+    , decoder : Json.Decode.Decoder value
+    , onResult : Result Http.Error value -> msg
+    }
+    -> Effect msg
+sendHttpRequest options =
+    let
+        onSuccess : value -> msg
+        onSuccess value =
+            options.onResult (Ok value)
+
+        onHttpError : Http.Error -> msg
+        onHttpError httpError =
+            options.onResult (Err httpError)
+    in
+    SendHttpRequest
+        { method = options.method
+        , url = options.url
+        , headers = options.headers
+        , body = options.body
+        , timeout = options.timeout
+        , tracker = options.tracker
+        , decoder = Json.Decode.map onSuccess options.decoder
+        , onHttpError = onHttpError
+        }
+
+
+
 -- SUPABASE
 
 
 type SupabaseRequest
-    = FetchSupabaseUser
+    = SignIn
 
 
-fetchSupabaseUser : Effect msg
-fetchSupabaseUser =
-    Supabase FetchSupabaseUser
+signIn : Effect msg
+signIn =
+    Supabase SignIn
 
 
 signOut : Effect msg
@@ -225,6 +297,41 @@ sendGitHubGraphQL ({ operation } as options) =
                 |> mapGraphQLDecoder (\value -> options.onResponse (Ok value))
         , onHttpError = Err >> options.onResponse
         }
+
+
+
+-- SENTRY
+
+
+sendHttpErrorToSentry :
+    { method : String
+    , url : String
+    , response : Maybe String
+    , error : Http.Error
+    }
+    -> Effect msg
+sendHttpErrorToSentry data =
+    SendHttpErrorToSentry data
+
+
+sendJsonErrorToSentry :
+    { method : String
+    , url : String
+    , response : String
+    , error : Json.Decode.Error
+    }
+    -> Effect msg
+sendJsonErrorToSentry data =
+    SendJsonErrorToSentry data
+
+
+sendCustomErrorToSentry :
+    { message : String
+    , details : List ( String, Json.Encode.Value )
+    }
+    -> Effect msg
+sendCustomErrorToSentry data =
+    SendCustomErrorToSentry data
 
 
 
@@ -269,6 +376,27 @@ map fn effect =
 
         SendGitHubGraphQL operation ->
             SendGitHubGraphQL (mapOperation fn operation)
+
+        SendHttpRequest data ->
+            SendHttpRequest
+                { method = data.method
+                , url = data.url
+                , headers = data.headers
+                , body = data.body
+                , timeout = data.timeout
+                , tracker = data.tracker
+                , onHttpError = \httpError -> fn (data.onHttpError httpError)
+                , decoder = Json.Decode.map fn data.decoder
+                }
+
+        SendHttpErrorToSentry data ->
+            SendHttpErrorToSentry data
+
+        SendJsonErrorToSentry data ->
+            SendJsonErrorToSentry data
+
+        SendCustomErrorToSentry data ->
+            SendCustomErrorToSentry data
 
 
 {-| Elm Land depends on this function to perform your effects.
@@ -352,11 +480,13 @@ toCmd options effect =
                             context_
             in
             case request of
-                FetchSupabaseUser ->
+                SignIn ->
                     Supabase.Auth.getUserData
                         { onResponse =
                             Shared.Msg.SupabaseUserApiResponded
                                 >> options.fromSharedMsg
+
+                        -- TODO: Report all Supabase HTTP Errors
                         }
                         context
 
@@ -371,8 +501,9 @@ toCmd options effect =
 
         SendGitHubGraphQL operation ->
             let
-                sendHttpRequest : { token : String } -> Cmd msg
-                sendHttpRequest user =
+                -- TODO: Report all HTTP errors
+                sendGitHubGraphQLHttpRequest : { token : String } -> Cmd msg
+                sendGitHubGraphQLHttpRequest user =
                     Http.request
                         { method = "POST"
                         , headers =
@@ -409,16 +540,296 @@ toCmd options effect =
                         |> Browser.Navigation.pushUrl options.key
 
                 Auth.User.FetchingUserDetails response ->
-                    sendHttpRequest { token = response.providerToken }
+                    sendGitHubGraphQLHttpRequest
+                        { token = response.providerToken
+                        }
 
                 Auth.User.SignedIn user ->
                     case user.github of
                         Just githubInfo ->
-                            sendHttpRequest { token = githubInfo.token }
+                            sendGitHubGraphQLHttpRequest
+                                { token = githubInfo.token
+                                }
 
                         Nothing ->
-                            -- TODO: Report to Sentry
-                            Cmd.none
+                            reportCustomErrorToSentry
+                                { message = "Attempted to call GitHub GraphQL API without token"
+                                , details = []
+                                }
+
+        SendHttpErrorToSentry data ->
+            outgoing
+                { tag = "SENTRY_REPORT_HTTP_ERROR"
+                , data =
+                    Json.Encode.object
+                        [ ( "method", Json.Encode.string data.method )
+                        , ( "url", Json.Encode.string data.url )
+                        , ( "response"
+                          , case data.response of
+                                Just response ->
+                                    Json.Encode.string response
+
+                                Nothing ->
+                                    Json.Encode.null
+                          )
+                        , ( "error", Json.Encode.string (fromHttpErrorToString data.error) )
+                        ]
+                }
+
+        SendJsonErrorToSentry data ->
+            outgoing
+                { tag = "SENTRY_REPORT_JSON_ERROR"
+                , data =
+                    Json.Encode.object
+                        [ ( "method", Json.Encode.string data.method )
+                        , ( "url", Json.Encode.string data.url )
+                        , ( "response", Json.Encode.string data.response )
+                        , ( "title", Json.Encode.string (fromJsonErrorToTitle data.error) )
+                        , ( "error", Json.Encode.string (Json.Decode.errorToString data.error) )
+                        ]
+                }
+
+        SendCustomErrorToSentry data ->
+            reportCustomErrorToSentry data
+
+        SendHttpRequest data ->
+            sendHttpWithErrorReporting options data
+
+
+
+-- AUTOMATIC ERROR REPORTING
+
+
+reportCustomErrorToSentry :
+    { message : String
+    , details : List ( String, Json.Encode.Value )
+    }
+    -> Cmd msg
+reportCustomErrorToSentry data =
+    outgoing
+        { tag = "SENTRY_REPORT_CUSTOM_ERROR"
+        , data =
+            Json.Encode.object
+                [ ( "message", Json.Encode.string data.message )
+                , ( "details", Json.Encode.object data.details )
+                ]
+        }
+
+
+sendHttpWithErrorReporting :
+    { options
+        | fromSharedMsg : Shared.Msg.Msg -> msg
+        , batch : List msg -> msg
+    }
+    -> HttpRequest msg
+    -> Cmd msg
+sendHttpWithErrorReporting options request =
+    let
+        toMsg : Result CustomError msg -> msg
+        toMsg =
+            fromCustomResultToMsg
+                { method = request.method
+                , url = request.url
+                , fromSharedMsg = options.fromSharedMsg
+                , batch = options.batch
+                , onHttpError = request.onHttpError
+                }
+
+        fromHttpResponse : Http.Response String -> Result CustomError msg
+        fromHttpResponse =
+            fromHttpResponseToCustomResult
+                { decoder = request.decoder
+                }
+    in
+    Http.request
+        { method = request.method
+        , url = request.url
+        , headers = request.headers
+        , body = request.body
+        , timeout = request.timeout
+        , tracker = request.tracker
+        , expect = Http.expectStringResponse toMsg fromHttpResponse
+        }
+
+
+{-| Because we want to send Sentry the actual JSON response,
+`Http.Error` won't be enough.
+
+For that reason, we make our own `CustomError` type that can store
+more data about the HTTP request.
+
+-}
+type CustomError
+    = JsonDecodeError
+        { response : String
+        , reason : Json.Decode.Error
+        }
+    | HttpError
+        { response : Maybe String
+        , reason : Http.Error
+        }
+
+
+toHttpError : CustomError -> Http.Error
+toHttpError customError =
+    case customError of
+        JsonDecodeError { response, reason } ->
+            Http.BadBody (Json.Decode.errorToString reason)
+
+        HttpError { reason } ->
+            reason
+
+
+fromHttpErrorToString : Http.Error -> String
+fromHttpErrorToString httpError =
+    case httpError of
+        Http.BadBody _ ->
+            "BadBody"
+
+        Http.BadUrl url ->
+            "BadUrl: " ++ url
+
+        Http.Timeout ->
+            "Timeout"
+
+        Http.NetworkError ->
+            "NetworkError"
+
+        Http.BadStatus code ->
+            "Status " ++ String.fromInt code
+
+
+fromCustomResultToMsg :
+    { method : String
+    , url : String
+    , batch : List msg -> msg
+    , fromSharedMsg : Shared.Msg.Msg -> msg
+    , onHttpError : Http.Error -> msg
+    }
+    -> Result CustomError msg
+    -> msg
+fromCustomResultToMsg options result =
+    case result of
+        Ok msg ->
+            msg
+
+        Err customError ->
+            options.batch
+                [ -- Let the original page handle the error
+                  customError
+                    |> toHttpError
+                    |> options.onHttpError
+                , -- Report the error to Sentry
+                  case customError of
+                    JsonDecodeError { response, reason } ->
+                        Shared.Msg.SendJsonDecodeErrorToSentry
+                            { method = options.method
+                            , url = options.url
+                            , response = response
+                            , error = reason
+                            }
+                            |> options.fromSharedMsg
+
+                    HttpError { response, reason } ->
+                        Shared.Msg.SendHttpErrorToSentry
+                            { method = options.method
+                            , url = options.url
+                            , response = response
+                            , error = reason
+                            }
+                            |> options.fromSharedMsg
+                ]
+
+
+fromJsonErrorToTitle : Json.Decode.Error -> String
+fromJsonErrorToTitle error =
+    let
+        toInfo : Json.Decode.Error -> List String -> { path : List String, problem : String }
+        toInfo err path =
+            case err of
+                Json.Decode.Field name inner ->
+                    toInfo inner (path ++ [ name ])
+
+                Json.Decode.Index name inner ->
+                    toInfo inner path
+
+                Json.Decode.OneOf [] ->
+                    { path = path, problem = "Empty OneOf provided" }
+
+                Json.Decode.OneOf (first :: _) ->
+                    toInfo first path
+
+                Json.Decode.Failure problem value ->
+                    { path = path, problem = problem }
+
+        info : { path : List String, problem : String }
+        info =
+            toInfo error []
+    in
+    if List.isEmpty info.path then
+        info.problem
+
+    else
+        "Problem at ${path}: ${problem}"
+            |> String.replace "${path}" (String.join "." info.path)
+            |> String.replace "${problem}" info.problem
+
+
+fromHttpResponseToCustomResult :
+    { decoder : Json.Decode.Decoder msg }
+    -> Http.Response String
+    -> Result CustomError msg
+fromHttpResponseToCustomResult options httpResponse =
+    case httpResponse of
+        Http.BadUrl_ url_ ->
+            -- means you did not provide a valid URL.
+            Err
+                (HttpError
+                    { response = Nothing
+                    , reason = Http.BadUrl url_
+                    }
+                )
+
+        Http.Timeout_ ->
+            -- means it took too long to get a response.
+            Err
+                (HttpError
+                    { response = Nothing
+                    , reason = Http.Timeout
+                    }
+                )
+
+        Http.NetworkError_ ->
+            -- means the user turned off their wifi, went in a cave, etc.
+            Err
+                (HttpError
+                    { response = Nothing
+                    , reason = Http.NetworkError
+                    }
+                )
+
+        Http.BadStatus_ metadata response ->
+            -- means you got a response back, but the status code indicates failure.
+            Err
+                (HttpError
+                    { response = Just response
+                    , reason = Http.BadStatus metadata.statusCode
+                    }
+                )
+
+        Http.GoodStatus_ metadata response ->
+            -- means you got a response back with a nice status code!
+            case Json.Decode.decodeString options.decoder response of
+                Ok msg ->
+                    Ok msg
+
+                Err jsonDecodeError ->
+                    Err
+                        (JsonDecodeError
+                            { response = response
+                            , reason = jsonDecodeError
+                            }
+                        )
 
 
 

@@ -70,7 +70,7 @@ init flagsResult route =
               , user = Auth.User.FetchingUserDetails oAuthResponse
               }
             , Effect.batch
-                [ Effect.fetchSupabaseUser
+                [ Effect.signIn
                 , Effect.saveOAuthResponse oAuthResponse
                 , Effect.replaceRoute
                     { path = route.path
@@ -104,10 +104,19 @@ update route msg model =
             , Effect.clearOAuthResponse
             )
 
+        Shared.Msg.SendHttpErrorToSentry data ->
+            ( model
+            , Effect.sendHttpErrorToSentry data
+            )
+
+        Shared.Msg.SendJsonDecodeErrorToSentry data ->
+            ( model
+            , Effect.sendJsonErrorToSentry data
+            )
+
         Shared.Msg.SupabaseUserApiResponded (Err httpError) ->
             ( { model | user = Auth.User.NotSignedIn }
             , Effect.clearOAuthResponse
-              -- |> Debug.log "TODO: Report this error to Sentry"
             )
 
         Shared.Msg.SupabaseUserApiResponded (Ok user) ->
