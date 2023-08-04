@@ -18,6 +18,7 @@ export const init = ({ env }) => {
 }
 
 export const sendHttpError = (event) => {
+  if (event.user) Sentry.setUser(event.user)
   Sentry.withScope((scope) => {
     if (event.response) {
       scope.addAttachment({
@@ -37,6 +38,7 @@ export const sendHttpError = (event) => {
 }
 
 export const sendJsonDecodeError = (event) => {
+  if (event.user) Sentry.setUser(event.user)
   Sentry.withScope((scope) => {
     scope.addAttachment({
       filename:
@@ -60,6 +62,7 @@ export const sendJsonDecodeError = (event) => {
 }
 
 export const sendCustomError = (event) => {
+  if (event.user) Sentry.setUser(event.user)
   Sentry.captureEvent({
     tags: { 'kind': 'Elm Error' },
     message: event.message,

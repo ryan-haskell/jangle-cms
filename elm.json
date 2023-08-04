@@ -15,15 +15,18 @@
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
             "elm-community/html-extra": "3.4.0",
+            "elm-community/json-extra": "4.3.0",
             "elm-community/string-extra": "4.0.1",
             "ryannhg/graphql": "1.0.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",
             "elm/file": "1.0.5",
+            "elm/parser": "1.1.0",
             "elm/regex": "1.0.0",
             "elm/time": "1.0.0",
-            "elm/virtual-dom": "1.0.3"
+            "elm/virtual-dom": "1.0.3",
+            "rtfeldman/elm-iso8601-date-strings": "1.1.4"
         }
     },
     "test-dependencies": {
@@ -33,7 +36,6 @@
         },
         "indirect": {
             "avh4/elm-fifo": "1.0.4",
-            "elm/parser": "1.1.0",
             "elm/random": "1.0.0",
             "elm-community/list-extra": "8.7.0",
             "hecrj/html-parser": "2.4.0",

@@ -574,7 +574,7 @@ toCmd options effect =
                                 }
 
                         Nothing ->
-                            reportCustomErrorToSentry
+                            reportCustomErrorToSentry options
                                 { message = "Attempted to call GitHub GraphQL API without token"
                                 , details = []
                                 }
@@ -595,6 +595,14 @@ toCmd options effect =
                                     Json.Encode.null
                           )
                         , ( "error", Json.Encode.string (fromHttpErrorToString data.error) )
+                        , ( "user"
+                          , case options.shared.user of
+                                Auth.User.SignedIn user ->
+                                    Auth.User.encode user
+
+                                _ ->
+                                    Json.Encode.null
+                          )
                         ]
                 }
 
@@ -608,11 +616,19 @@ toCmd options effect =
                         , ( "response", Json.Encode.string data.response )
                         , ( "title", Json.Encode.string (fromJsonErrorToTitle data.error) )
                         , ( "error", Json.Encode.string (Json.Decode.errorToString data.error) )
+                        , ( "user"
+                          , case options.shared.user of
+                                Auth.User.SignedIn user ->
+                                    Auth.User.encode user
+
+                                _ ->
+                                    Json.Encode.null
+                          )
                         ]
                 }
 
         SendCustomErrorToSentry data ->
-            reportCustomErrorToSentry data
+            reportCustomErrorToSentry options data
 
         SendHttpRequest data ->
             sendHttpWithErrorReporting options data
@@ -623,17 +639,27 @@ toCmd options effect =
 
 
 reportCustomErrorToSentry :
-    { message : String
-    , details : List ( String, Json.Encode.Value )
-    }
+    { options | shared : Shared.Model.Model }
+    ->
+        { message : String
+        , details : List ( String, Json.Encode.Value )
+        }
     -> Cmd msg
-reportCustomErrorToSentry data =
+reportCustomErrorToSentry options data =
     outgoing
         { tag = "SENTRY_REPORT_CUSTOM_ERROR"
         , data =
             Json.Encode.object
                 [ ( "message", Json.Encode.string data.message )
                 , ( "details", Json.Encode.object data.details )
+                , ( "user"
+                  , case options.shared.user of
+                        Auth.User.SignedIn user ->
+                            Auth.User.encode user
+
+                        _ ->
+                            Json.Encode.null
+                  )
                 ]
         }
 
