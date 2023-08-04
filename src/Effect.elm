@@ -10,6 +10,7 @@ port module Effect exposing
     , showDialog
     , sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
     , sendGitHubGraphQL
+    , sendHttpRequest
     )
 
 {-|
@@ -34,6 +35,7 @@ port module Effect exposing
 @docs sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
 
 @docs sendGitHubGraphQL
+@docs sendHttpRequest
 
 -}
 
@@ -55,6 +57,7 @@ import Shared.Msg
 import Supabase.Auth
 import Supabase.Context
 import Supabase.OAuthResponse
+import Supabase.Request
 import Task
 import Url exposing (Url)
 
@@ -111,6 +114,28 @@ type alias HttpRequest msg =
     , tracker : Maybe String
     , decoder : Json.Decode.Decoder msg
     , onHttpError : Http.Error -> msg
+    }
+
+
+fromSupabaseRequest : Supabase.Request.Request value msg -> HttpRequest msg
+fromSupabaseRequest request =
+    let
+        onSuccess : value -> msg
+        onSuccess value =
+            request.onResponse (Ok value)
+
+        onHttpError : Http.Error -> msg
+        onHttpError httpError =
+            request.onResponse (Err httpError)
+    in
+    { method = request.method
+    , url = request.url
+    , headers = request.headers
+    , body = request.body
+    , timeout = request.timeout
+    , tracker = request.tracker
+    , decoder = Json.Decode.map onSuccess request.decoder
+    , onHttpError = onHttpError
     }
 
 
@@ -226,18 +251,18 @@ sendHttpRequest :
     , timeout : Maybe Float
     , tracker : Maybe String
     , decoder : Json.Decode.Decoder value
-    , onResult : Result Http.Error value -> msg
+    , onResponse : Result Http.Error value -> msg
     }
     -> Effect msg
 sendHttpRequest options =
     let
         onSuccess : value -> msg
         onSuccess value =
-            options.onResult (Ok value)
+            options.onResponse (Ok value)
 
         onHttpError : Http.Error -> msg
         onHttpError httpError =
-            options.onResult (Err httpError)
+            options.onResponse (Err httpError)
     in
     SendHttpRequest
         { method = options.method
@@ -478,17 +503,22 @@ toCmd options effect =
 
                         Nothing ->
                             context_
-            in
-            case request of
-                SignIn ->
-                    Supabase.Auth.getUserData
-                        { onResponse =
-                            Shared.Msg.SupabaseUserApiResponded
-                                >> options.fromSharedMsg
 
-                        -- TODO: Report all Supabase HTTP Errors
-                        }
-                        context
+                httpRequest : HttpRequest msg
+                httpRequest =
+                    case request of
+                        SignIn ->
+                            Supabase.Auth.getUserData
+                                { onResponse =
+                                    Shared.Msg.SupabaseUserApiResponded
+                                        >> options.fromSharedMsg
+                                }
+                                context
+                                |> fromSupabaseRequest
+            in
+            sendHttpWithErrorReporting
+                options
+                httpRequest
 
         ShowDialog { id } ->
             outgoing

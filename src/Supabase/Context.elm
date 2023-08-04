@@ -14,6 +14,8 @@ module Supabase.Context exposing
 -}
 
 import Http
+import Json.Decode
+import Supabase.Request
 
 
 type Context
@@ -50,24 +52,25 @@ toHttpRequest :
     { method : String
     , endpoint : String
     , body : Http.Body
-    , expect : Http.Expect msg
+    , decoder : Json.Decode.Decoder value
+    , onResponse : Result Http.Error value -> msg
     }
     -> Context
-    -> Cmd msg
+    -> Supabase.Request.Request value msg
 toHttpRequest props (Context context) =
-    Http.request
-        { method = props.method
-        , url = context.url ++ props.endpoint
-        , headers =
-            List.filterMap identity
-                [ Just (Http.header "apikey" context.apiKey)
-                , Just (Http.header "Content-Type" "application/json")
-                , context.userToken
-                    |> Maybe.map
-                        (\token -> Http.header "Authorization" ("Bearer " ++ token))
-                ]
-        , body = props.body
-        , expect = props.expect
-        , timeout = context.timeout
-        , tracker = context.tracker
-        }
+    { method = props.method
+    , url = context.url ++ props.endpoint
+    , headers =
+        List.filterMap identity
+            [ Just (Http.header "apikey" context.apiKey)
+            , Just (Http.header "Content-Type" "application/json")
+            , context.userToken
+                |> Maybe.map
+                    (\token -> Http.header "Authorization" ("Bearer " ++ token))
+            ]
+    , body = props.body
+    , decoder = props.decoder
+    , onResponse = props.onResponse
+    , timeout = context.timeout
+    , tracker = context.tracker
+    }

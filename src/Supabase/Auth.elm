@@ -19,6 +19,7 @@ import Http
 import Json.Decode
 import Json.Encode
 import Supabase.Context exposing (Context)
+import Supabase.Request
 import Url.Builder
 
 
@@ -78,13 +79,14 @@ getUserData :
     { onResponse : Result Http.Error User -> msg
     }
     -> Context
-    -> Cmd msg
+    -> Supabase.Request.Request User msg
 getUserData props context =
     Supabase.Context.toHttpRequest
         { method = "GET"
         , endpoint = "/auth/v1/user"
         , body = Http.emptyBody
-        , expect = Http.expectJson props.onResponse userDecoder
+        , decoder = userDecoder
+        , onResponse = props.onResponse
         }
         context
 
