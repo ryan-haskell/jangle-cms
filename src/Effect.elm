@@ -81,7 +81,7 @@ type Effect msg
     | Supabase SupabaseRequest
       -- DIALOGS
     | ShowDialog { id : String }
-      -- GRAPHQL CALLS
+      -- GITHUB GRAPHQL
     | SendGitHubGraphQL (Operation msg)
       -- SENTRY ERROR REPORTING
     | SendHttpErrorToSentry
@@ -501,10 +501,9 @@ toCmd options effect =
 
         SendGitHubGraphQL operation ->
             let
-                -- TODO: Report all HTTP errors
                 sendGitHubGraphQLHttpRequest : { token : String } -> Cmd msg
                 sendGitHubGraphQLHttpRequest user =
-                    Http.request
+                    sendHttpWithErrorReporting options
                         { method = "POST"
                         , headers =
                             [ Http.header
@@ -518,18 +517,11 @@ toCmd options effect =
                                 , query = operation.query
                                 , variables = operation.variables
                                 }
-                        , expect =
-                            GraphQL.Http.expect
-                                (\result ->
-                                    case result of
-                                        Ok msg ->
-                                            msg
-
-                                        Err httpError ->
-                                            operation.onHttpError httpError
-                                )
-                                operation.decoder
-                        , timeout = Nothing
+                        , onHttpError = operation.onHttpError
+                        , decoder =
+                            Json.Decode.field "data"
+                                (GraphQL.Decode.toJsonDecoder operation.decoder)
+                        , timeout = Just 15000
                         , tracker = Nothing
                         }
             in
