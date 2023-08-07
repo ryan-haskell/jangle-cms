@@ -8,6 +8,7 @@ query SearchRepos($searchQuery: String!) {
       __typename
       ... on Repository {
         databaseId
+        name
         nameWithOwner
       }
     }

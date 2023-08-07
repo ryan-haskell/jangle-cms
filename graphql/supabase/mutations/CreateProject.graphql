@@ -1,0 +1,16 @@
+mutation CreateProject(
+  $userId: UUID!,
+  $githubRepoId: String!
+) {
+  insertIntoprojectsCollection(objects: [
+    { user_id: $userId, github_repo_id: $githubRepoId }
+  ]) {
+    records {
+      ...Project
+    }
+  }
+}
+
+fragment Project on projects {
+  id
+}

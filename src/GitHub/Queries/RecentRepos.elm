@@ -13,10 +13,10 @@ module GitHub.Queries.RecentRepos exposing
 
 -}
 
-import GitHub.Operation exposing (Operation)
 import GitHub.Queries.RecentRepos.Input
 import GraphQL.Decode
 import GraphQL.Encode
+import GraphQL.Operation exposing (Operation)
 
 
 type alias Data =
@@ -36,6 +36,7 @@ type alias RepositoryConnection =
 
 type alias Repository =
     { databaseId : Maybe Int
+    , name : String
     , nameWithOwner : String
     }
 
@@ -44,7 +45,7 @@ type alias Input =
     GitHub.Queries.RecentRepos.Input.Input {}
 
 
-new : Input -> GitHub.Operation.Operation Data
+new : Input -> GraphQL.Operation.Operation Data
 new input =
     { name = "RecentRepos"
     , query = """
@@ -57,6 +58,7 @@ new input =
             ) {
               nodes {
                 databaseId
+                name
                 nameWithOwner
               }
             }
@@ -86,6 +88,10 @@ decoder =
                                             |> GraphQL.Decode.field
                                                 { name = "databaseId"
                                                 , decoder = GraphQL.Decode.maybe GraphQL.Decode.int
+                                                }
+                                            |> GraphQL.Decode.field
+                                                { name = "name"
+                                                , decoder = GraphQL.Decode.string
                                                 }
                                             |> GraphQL.Decode.field
                                                 { name = "nameWithOwner"

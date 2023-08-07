@@ -1,4 +1,4 @@
-module GitHub.Relay exposing (toNodes)
+module GraphQL.Relay exposing (toNodes)
 
 
 toNodes : { connection | nodes : Maybe (List (Maybe node)) } -> List node

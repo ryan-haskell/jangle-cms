@@ -1,4 +1,4 @@
-module GitHub.Response exposing (Response(..), fromResult)
+module GraphQL.Response exposing (Response(..), fromResult)
 
 import Http
 

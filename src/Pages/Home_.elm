@@ -11,14 +11,15 @@ import Components.Input
 import Components.Layout
 import Components.List
 import Css
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import GitHub.Queries.RecentRepos
 import GitHub.Queries.RecentRepos.Input
 import GitHub.Queries.SearchRepos
 import GitHub.Queries.SearchRepos.Input
 import GitHub.Queries.SearchRepos.SearchResultItem as SearchResultItem
-import GitHub.Relay
-import GitHub.Response
+import GraphQL.Relay
+import GraphQL.Response exposing (Response)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events
@@ -30,6 +31,9 @@ import Route exposing (Route)
 import Route.Path exposing (Path)
 import Shared
 import String.Extra
+import Supabase.Mutations.CreateProject
+import Supabase.Mutations.CreateProject.Input
+import Supabase.Scalars.UUID
 import View exposing (View)
 
 
@@ -56,8 +60,9 @@ page user shared route =
 
 type alias Model =
     { searchQuery : String
-    , recentRepos : GitHub.Response.Response (List Repo)
-    , searchRepos : Maybe (GitHub.Response.Response (List Repo))
+    , recentRepos : Response (List Repo)
+    , searchRepos : Maybe (Response (List Repo))
+    , newProject : Maybe (Response Supabase.Mutations.CreateProject.Data)
     }
 
 
@@ -68,8 +73,9 @@ type alias Repo =
 init : Auth.User -> () -> ( Model, Effect Msg )
 init user () =
     ( { searchQuery = ""
-      , recentRepos = GitHub.Response.Loading
+      , recentRepos = GraphQL.Response.Loading
       , searchRepos = Nothing
+      , newProject = Nothing
       }
     , case user.github of
         Just { username } ->
@@ -99,24 +105,29 @@ init user () =
 type Msg
     = ClickedCreateFirstProject
     | ChangedSearchValue Auth.User.GitHubInfo String
-    | SelectedRepo Repo
+    | SelectedRepo Int Repo
     | ThrottledSearchRepos { username : String, searchQuery : String }
     | FetchedRecentRepos String (Result Http.Error GitHub.Queries.RecentRepos.Data)
     | FetchedSearchRepos (Result Http.Error GitHub.Queries.SearchRepos.Data)
+    | FetchedCreateNewProject (Result Http.Error Supabase.Mutations.CreateProject.Data)
 
 
 update : Auth.User -> Msg -> Model -> ( Model, Effect Msg )
 update user msg model =
     case msg of
         ClickedCreateFirstProject ->
-            ( { model | searchQuery = "" }
+            ( { model
+                | searchQuery = ""
+                , newProject = Nothing
+                , searchRepos = Nothing
+              }
             , Effect.showDialog { id = ids.createProjectDialog }
             )
 
         ChangedSearchValue { username } searchQuery ->
             ( { model
                 | searchQuery = searchQuery
-                , searchRepos = Just GitHub.Response.Loading
+                , searchRepos = Just GraphQL.Response.Loading
               }
             , if String.Extra.isBlank searchQuery then
                 Effect.none
@@ -154,9 +165,20 @@ update user msg model =
                 Effect.none
             )
 
-        SelectedRepo repo ->
-            ( model
-            , Effect.none
+        SelectedRepo repoId repo ->
+            let
+                input : Supabase.Mutations.CreateProject.Input
+                input =
+                    Supabase.Mutations.CreateProject.Input.new
+                        |> Supabase.Mutations.CreateProject.Input.title repo.name
+                        |> Supabase.Mutations.CreateProject.Input.githubRepoId (String.fromInt repoId)
+                        |> Supabase.Mutations.CreateProject.Input.userId user.id
+            in
+            ( { model | newProject = Just GraphQL.Response.Loading }
+            , Effect.sendSupabaseGraphQL
+                { operation = Supabase.Mutations.CreateProject.new input
+                , onResponse = FetchedCreateNewProject
+                }
             )
 
         FetchedRecentRepos username (Ok data) ->
@@ -166,7 +188,7 @@ update user msg model =
                         | recentRepos =
                             ("Couldn't find user: " ++ username)
                                 |> Http.BadBody
-                                |> GitHub.Response.Failure
+                                |> GraphQL.Response.Failure
                       }
                     , Effect.sendCustomErrorToSentry
                         { message = "GitHub could not find user"
@@ -180,14 +202,14 @@ update user msg model =
                     ( { model
                         | recentRepos =
                             user_.repositories
-                                |> GitHub.Relay.toNodes
-                                |> GitHub.Response.Success
+                                |> GraphQL.Relay.toNodes
+                                |> GraphQL.Response.Success
                       }
                     , Effect.none
                     )
 
         FetchedRecentRepos username (Err httpError) ->
-            ( { model | recentRepos = GitHub.Response.Failure httpError }
+            ( { model | recentRepos = GraphQL.Response.Failure httpError }
             , Effect.none
             )
 
@@ -203,9 +225,9 @@ update user msg model =
             in
             ( { model
                 | searchRepos =
-                    GitHub.Relay.toNodes data.search
+                    GraphQL.Relay.toNodes data.search
                         |> List.filterMap toRepo
-                        |> GitHub.Response.Success
+                        |> GraphQL.Response.Success
                         |> Just
               }
             , Effect.none
@@ -215,9 +237,38 @@ update user msg model =
             ( { model
                 | searchRepos =
                     httpError
-                        |> GitHub.Response.Failure
+                        |> GraphQL.Response.Failure
                         |> Just
               }
+            , Effect.none
+            )
+
+        FetchedCreateNewProject (Ok data) ->
+            case data.projects.records of
+                [] ->
+                    ( { model
+                        | newProject = Just (GraphQL.Response.Failure (Http.BadBody "No records were created"))
+                      }
+                    , Effect.sendCustomErrorToSentry
+                        { message = "Create new project returned no new values"
+                        , details = []
+                        }
+                    )
+
+                project :: _ ->
+                    ( { model | newProject = Just (GraphQL.Response.Success data) }
+                    , Effect.pushRoute
+                        { path =
+                            Route.Path.Projects_ProjectId_
+                                { projectId = Supabase.Scalars.UUID.toString project.id
+                                }
+                        , query = Dict.empty
+                        , hash = Nothing
+                        }
+                    )
+
+        FetchedCreateNewProject (Err httpError) ->
+            ( { model | newProject = Just (GraphQL.Response.Failure httpError) }
             , Effect.none
             )
 
@@ -276,53 +327,88 @@ view user model =
 
 viewCreateProjectForm : Auth.User.GitHubInfo -> Model -> Html Msg
 viewCreateProjectForm githubInfo model =
-    div [ Css.col, Css.gap_16 ]
-        [ Components.Field.new
-            { input =
-                Components.Input.new
-                    { value = model.searchQuery
-                    }
-                    |> Components.Input.withStyleSearch
-                    |> Components.Input.withOnInput (ChangedSearchValue githubInfo)
-            }
-            |> Components.Field.withWidthFill
-            |> Components.Field.withLabel "Find a repository"
-            |> Components.Field.view
-        , if String.isEmpty model.searchQuery then
-            case model.recentRepos of
-                GitHub.Response.Loading ->
-                    Components.EmptyState.viewLoading
+    let
+        viewRepoNameSearchField : Html Msg
+        viewRepoNameSearchField =
+            Components.Field.new
+                { input =
+                    Components.Input.new
+                        { value = model.searchQuery
+                        }
+                        |> Components.Input.withStyleSearch
+                        |> Components.Input.withOnInput (ChangedSearchValue githubInfo)
+                }
+                |> Components.Field.withWidthFill
+                |> Components.Field.withLabel "Find a repository"
+                |> Components.Field.view
 
-                GitHub.Response.Failure httpError ->
-                    Components.EmptyState.viewHttpError httpError
+        viewRepoOptions : Html Msg
+        viewRepoOptions =
+            if String.isEmpty model.searchQuery then
+                viewRecentRepoOptions
 
-                GitHub.Response.Success repos ->
-                    Components.List.view { items = List.map toListItem repos }
+            else
+                viewFilteredRepoOptions
 
-          else
+        viewFilteredRepoOptions : Html Msg
+        viewFilteredRepoOptions =
             case model.searchRepos of
                 Nothing ->
                     Components.EmptyState.viewLoading
 
-                Just GitHub.Response.Loading ->
+                Just GraphQL.Response.Loading ->
                     Components.EmptyState.viewLoading
 
-                Just (GitHub.Response.Failure httpError) ->
+                Just (GraphQL.Response.Failure httpError) ->
                     Components.EmptyState.viewHttpError httpError
 
-                Just (GitHub.Response.Success repos) ->
+                Just (GraphQL.Response.Success repos) ->
                     if List.isEmpty repos then
                         Components.EmptyState.viewNoResultsFound
                             "No repositories found matching your search"
 
                     else
-                        Components.List.view { items = List.map toListItem repos }
+                        Components.List.view { items = List.filterMap toListItem repos }
+
+        viewRecentRepoOptions : Html Msg
+        viewRecentRepoOptions =
+            case model.recentRepos of
+                GraphQL.Response.Loading ->
+                    Components.EmptyState.viewLoading
+
+                GraphQL.Response.Failure httpError ->
+                    Components.EmptyState.viewHttpError httpError
+
+                GraphQL.Response.Success repos ->
+                    Components.List.view { items = List.filterMap toListItem repos }
+    in
+    div [ Css.col, Css.gap_16 ]
+        [ viewRepoNameSearchField
+        , case model.newProject of
+            Nothing ->
+                viewRepoOptions
+
+            Just GraphQL.Response.Loading ->
+                Components.EmptyState.viewLoading
+
+            Just (GraphQL.Response.Failure httpError) ->
+                -- TODO: Show a "Try again" option
+                Components.EmptyState.viewHttpError httpError
+
+            Just (GraphQL.Response.Success repos) ->
+                Components.EmptyState.viewLoading
         ]
 
 
-toListItem : Repo -> Components.List.Item Msg
+toListItem : Repo -> Maybe (Components.List.Item Msg)
 toListItem repo =
-    { icon = Components.Icon.GitHub
-    , label = repo.nameWithOwner
-    , onClick = SelectedRepo repo
-    }
+    case repo.databaseId of
+        Nothing ->
+            Nothing
+
+        Just repoId ->
+            Just
+                { icon = Components.Icon.GitHub
+                , label = repo.nameWithOwner
+                , onClick = SelectedRepo repoId repo
+                }

@@ -10,6 +10,7 @@ port module Effect exposing
     , showDialog
     , sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
     , sendGitHubGraphQL
+    , sendSupabaseGraphQL
     , sendHttpRequest
     )
 
@@ -35,6 +36,8 @@ port module Effect exposing
 @docs sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
 
 @docs sendGitHubGraphQL
+@docs sendSupabaseGraphQL
+
 @docs sendHttpRequest
 
 -}
@@ -42,10 +45,10 @@ port module Effect exposing
 import Auth.User
 import Browser.Navigation
 import Dict exposing (Dict)
-import GitHub.Operation
 import GraphQL.Decode
 import GraphQL.Encode
 import GraphQL.Http
+import GraphQL.Operation
 import Http
 import Json.Decode
 import Json.Encode
@@ -82,6 +85,7 @@ type Effect msg
     | SendHttpRequest (HttpRequest msg)
       -- SUPABASE
     | Supabase SupabaseRequest
+    | SendSupabaseGraphQL (Operation msg)
       -- DIALOGS
     | ShowDialog { id : String }
       -- GITHUB GRAPHQL
@@ -304,16 +308,33 @@ showDialog { id } =
 
 
 
--- GITHUB GRAPHQL
+-- GRAPHQL
 
 
 sendGitHubGraphQL :
-    { operation : GitHub.Operation.Operation value
+    { operation : GraphQL.Operation.Operation value
     , onResponse : Result Http.Error value -> msg
     }
     -> Effect msg
 sendGitHubGraphQL ({ operation } as options) =
     SendGitHubGraphQL
+        { name = operation.name
+        , query = operation.query
+        , variables = operation.variables
+        , decoder =
+            operation.decoder
+                |> mapGraphQLDecoder (\value -> options.onResponse (Ok value))
+        , onHttpError = Err >> options.onResponse
+        }
+
+
+sendSupabaseGraphQL :
+    { operation : GraphQL.Operation.Operation value
+    , onResponse : Result Http.Error value -> msg
+    }
+    -> Effect msg
+sendSupabaseGraphQL ({ operation } as options) =
+    SendSupabaseGraphQL
         { name = operation.name
         , query = operation.query
         , variables = operation.variables
@@ -401,6 +422,9 @@ map fn effect =
 
         SendGitHubGraphQL operation ->
             SendGitHubGraphQL (mapOperation fn operation)
+
+        SendSupabaseGraphQL operation ->
+            SendSupabaseGraphQL (mapOperation fn operation)
 
         SendHttpRequest data ->
             SendHttpRequest
@@ -528,6 +552,49 @@ toCmd options effect =
                         [ ( "id", Json.Encode.string id )
                         ]
                 }
+
+        SendSupabaseGraphQL operation ->
+            let
+                sendSupabaseGraphQLHttpRequest : { token : String } -> Cmd msg
+                sendSupabaseGraphQLHttpRequest user =
+                    sendHttpWithErrorReporting options
+                        { method = "POST"
+                        , headers =
+                            [ Http.header "apikey" options.shared.flags.supabase.apiKey
+                            , Http.header
+                                "Authorization"
+                                ("Bearer " ++ user.token)
+                            ]
+                        , url = options.shared.flags.supabase.url ++ "/graphql/v1"
+                        , body =
+                            GraphQL.Http.body
+                                { operationName = Just operation.name
+                                , query = operation.query
+                                , variables = operation.variables
+                                }
+                        , onHttpError = operation.onHttpError
+                        , decoder =
+                            Json.Decode.field "data"
+                                (GraphQL.Decode.toJsonDecoder operation.decoder)
+                        , timeout = Just 15000
+                        , tracker = Nothing
+                        }
+            in
+            case options.shared.user of
+                Auth.User.NotSignedIn ->
+                    Route.Path.SignIn
+                        |> Route.Path.toString
+                        |> Browser.Navigation.pushUrl options.key
+
+                Auth.User.FetchingUserDetails response ->
+                    sendSupabaseGraphQLHttpRequest
+                        { token = response.accessToken
+                        }
+
+                Auth.User.SignedIn user ->
+                    sendSupabaseGraphQLHttpRequest
+                        { token = user.supabaseToken
+                        }
 
         SendGitHubGraphQL operation ->
             let

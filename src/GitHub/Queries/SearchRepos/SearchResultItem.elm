@@ -17,5 +17,6 @@ type SearchResultItem
 
 type alias Repository =
     { databaseId : Maybe Int
+    , name : String
     , nameWithOwner : String
     }

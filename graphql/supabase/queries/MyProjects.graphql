@@ -1,0 +1,11 @@
+query MyProjects {
+  projects: projectsCollection(first: 25) {
+    edges {
+      node {
+        id
+        github_repo_id
+        user_id
+      }
+    }
+  }
+}

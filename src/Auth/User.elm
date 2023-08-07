@@ -8,6 +8,7 @@ module Auth.User exposing
 import Json.Encode
 import Json.Encode.Extra
 import Supabase.OAuthResponse
+import Supabase.Scalars.UUID exposing (UUID)
 
 
 type SignInStatus
@@ -17,7 +18,7 @@ type SignInStatus
 
 
 type alias User =
-    { id : String
+    { id : UUID
     , name : String
     , email : String
     , image : Maybe String
@@ -35,7 +36,7 @@ type alias GitHubInfo =
 encode : User -> Json.Encode.Value
 encode user =
     Json.Encode.object
-        [ ( "id", Json.Encode.string user.id )
+        [ ( "id", Json.Encode.string (Supabase.Scalars.UUID.toString user.id) )
         , ( "name", Json.Encode.string user.name )
         , ( "username"
           , user.github

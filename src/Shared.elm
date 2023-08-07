@@ -21,6 +21,7 @@ import Shared.Flags
 import Shared.Model
 import Shared.Msg
 import Supabase.OAuthResponse
+import Supabase.Scalars.UUID
 
 
 
@@ -128,7 +129,7 @@ update route msg model =
                     }
                     -> Auth.User.User
                 toUser response =
-                    { id = user.id
+                    { id = Supabase.Scalars.UUID.fromString user.id
                     , name =
                         [ user.github
                             |> Maybe.andThen .name

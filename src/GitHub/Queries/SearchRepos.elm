@@ -13,11 +13,11 @@ module GitHub.Queries.SearchRepos exposing
 
 -}
 
-import GitHub.Operation exposing (Operation)
 import GitHub.Queries.SearchRepos.Input
 import GitHub.Queries.SearchRepos.SearchResultItem
 import GraphQL.Decode
 import GraphQL.Encode
+import GraphQL.Operation exposing (Operation)
 
 
 type alias Data =
@@ -38,7 +38,7 @@ type alias Input =
     GitHub.Queries.SearchRepos.Input.Input {}
 
 
-new : Input -> GitHub.Operation.Operation Data
+new : Input -> GraphQL.Operation.Operation Data
 new input =
     { name = "SearchRepos"
     , query = """
@@ -52,6 +52,7 @@ new input =
               __typename
               ... on Repository {
                 databaseId
+                name
                 nameWithOwner
               }
             }
@@ -82,6 +83,10 @@ decoder =
                                             |> GraphQL.Decode.field
                                                 { name = "databaseId"
                                                 , decoder = GraphQL.Decode.maybe GraphQL.Decode.int
+                                                }
+                                            |> GraphQL.Decode.field
+                                                { name = "name"
+                                                , decoder = GraphQL.Decode.string
                                                 }
                                             |> GraphQL.Decode.field
                                                 { name = "nameWithOwner"

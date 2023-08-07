@@ -1,4 +1,4 @@
-module GitHub.Operation exposing (Operation)
+module GraphQL.Operation exposing (Operation)
 
 import GraphQL.Decode
 import GraphQL.Encode

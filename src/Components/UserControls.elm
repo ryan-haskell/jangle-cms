@@ -135,6 +135,7 @@ view (UserControls props) =
         , Html.Attributes.Extra.attributeIf
             props.isWidthFill
             Css.fill
+        , Css.mw_fill
         ]
         [ viewDefaultButton
         , Html.Extra.viewIf
