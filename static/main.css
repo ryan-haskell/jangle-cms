@@ -473,3 +473,7 @@ dialog::backdrop {
     transform: rotate(360deg);
   }
 }
+
+input[type = 'search']::-webkit-search-cancel-button {
+  display: none;
+}

@@ -33,9 +33,9 @@ view props =
                 , Css.padX_12
                 , Html.Events.onClick item.onClick
                 ]
-                [ div [ Css.row, Css.align_cy, Css.gap_8 ]
+                [ div [ Css.row, Css.align_cy, Css.gap_8, Css.overflow_hidden ]
                     [ Components.Icon.view24 item.icon
-                    , span [ Css.font_label ] [ text item.label ]
+                    , span [ Css.font_label, Css.ellipsis ] [ text item.label ]
                     ]
                 , Components.Icon.view16 Components.Icon.Right
                 ]

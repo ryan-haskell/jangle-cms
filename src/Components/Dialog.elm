@@ -77,25 +77,32 @@ view (Dialog props) =
     let
         viewHeader : Html msg
         viewHeader =
-            div [ Css.row, Css.align_top, Css.gap_fill, Css.gap_16 ]
-                [ div [ Css.col, Css.gap_4, Css.overflow_hidden ]
-                    [ span [ Css.font_h1, Css.ellipsis ] [ text props.title ]
-                    , Html.Extra.viewMaybe
-                        (\subtitle ->
-                            span
-                                [ Css.font_sublabel
-                                , Css.color_textSecondary
-                                ]
-                                [ text subtitle ]
-                        )
-                        props.subtitle
-                    ]
-                , viewCloseButton
+            div
+                [ Css.col
+                , Css.gap_4
+                , Css.overflow_hidden
+                , Css.padRight_40
+                ]
+                [ span [ Css.font_h1, Css.ellipsis ] [ text props.title ]
+                , Html.Extra.viewMaybe
+                    (\subtitle ->
+                        span
+                            [ Css.font_sublabel
+                            , Css.color_textSecondary
+                            ]
+                            [ text subtitle ]
+                    )
+                    props.subtitle
                 ]
 
         viewCloseButton : Html msg
         viewCloseButton =
-            form [ Attr.method "dialog" ]
+            form
+                [ Attr.method "dialog"
+                , Attr.style "position" "absolute"
+                , Attr.style "top" "2rem"
+                , Attr.style "right" "2rem"
+                ]
                 [ Components.IconButton.new
                     { label = "Close dialog"
                     , icon = Components.Icon.Close
@@ -124,8 +131,10 @@ view (Dialog props) =
             , Css.pad_32
             , Css.gap_32
             , Css.scroll
+            , Css.relative
             ]
             [ viewHeader
             , div [ Css.fill ] props.content
+            , viewCloseButton
             ]
         ]

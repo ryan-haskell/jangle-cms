@@ -129,6 +129,7 @@ view (Input props) =
                     , Attr.value props.value
                     , onInputAttribute
                     , errorAttribute
+                    , Attr.type_ "search"
                     , widthAttr
                     ]
                     []
