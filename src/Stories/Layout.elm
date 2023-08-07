@@ -84,10 +84,13 @@ view controls =
                 sidebar : Components.Sidebar.Sidebar Msg
                 sidebar =
                     Components.Sidebar.new
-                        { current = Route.Path.Home_
+                        { current =
+                            Route.Path.Projects_ProjectId_
+                                { projectId = "1234"
+                                }
                         , user = user
                         , onUserControlsClick = ClickedUserControls
-                        , project = { id = "jangle", name = "Jangle" }
+                        , projectId = "1234"
                         , contentLinks =
                             [ { icon = Components.Icon.Page
                               , label = "Homepage"

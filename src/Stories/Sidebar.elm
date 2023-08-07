@@ -43,7 +43,7 @@ view controls =
             , email = "ryan@jangle.io"
             }
         , onUserControlsClick = ClickedUserControls
-        , project = { id = "jangle", name = "Jangle" }
+        , projectId = "123"
         , contentLinks =
             [ { icon = Components.Icon.Page
               , label = "Homepage"

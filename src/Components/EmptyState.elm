@@ -1,5 +1,6 @@
 module Components.EmptyState exposing
-    ( viewCreateYourFirstProject
+    ( viewCreateYourFirstContentType
+    , viewCreateYourFirstProject
     , viewHttpError
     , viewLoading
     , viewNoResultsFound
@@ -25,6 +26,24 @@ viewCreateYourFirstProject props =
         , subtitle = "Welcome to Jangle! Let's get started by connecting to any existing GitHub repository."
         , button =
             { label = "Create new project"
+            , id = props.id
+            , onClick = props.onClick
+            }
+        }
+
+
+viewCreateYourFirstContentType :
+    { id : String
+    , onClick : msg
+    }
+    -> Html msg
+viewCreateYourFirstContentType props =
+    viewEmptyStateWithOptions
+        { image = viewWindAndLeavesSvg
+        , title = "Let's get started"
+        , subtitle = "Next, let's define our first \"content type\" to define what kind of content we want to manage."
+        , button =
+            { label = "Create a content type"
             , id = props.id
             , onClick = props.onClick
             }

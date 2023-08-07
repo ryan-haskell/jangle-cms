@@ -2,6 +2,7 @@ module Stories.List exposing (main)
 
 import Components.Icon
 import Components.List
+import Components.ListItem
 import Html exposing (Html)
 import Json.Decode
 import Storybook.Component
@@ -37,21 +38,11 @@ view : Controls -> Html Msg
 view controls =
     Components.List.view
         { items =
-            [ { icon = Components.Icon.GitHub
-              , label = "@ryannhg/rhg_dev"
-              , onClick = Clicked "@ryannhg/rhg_dev"
-              }
-            , { icon = Components.Icon.GitHub
-              , label = "@ryannhg/rhg_dev"
-              , onClick = Clicked "@ryannhg/rhg_dev"
-              }
-            , { icon = Components.Icon.GitHub
-              , label = "@ryannhg/rhg_dev"
-              , onClick = Clicked "@ryannhg/rhg_dev"
-              }
-            , { icon = Components.Icon.GitHub
-              , label = "@ryannhg/rhg_dev"
-              , onClick = Clicked "@ryannhg/rhg_dev"
-              }
-            ]
+            List.repeat 5
+                (Components.ListItem.new
+                    { icon = Components.Icon.GitHub
+                    , label = "@ryannhg/rhg_dev"
+                    }
+                    |> Components.ListItem.withOnClick (Clicked "@ryannhg/rhg_dev")
+                )
         }

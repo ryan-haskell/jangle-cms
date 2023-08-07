@@ -30,6 +30,7 @@ page user shared route =
                 Layouts.Sidebar
                     { title = route.params.typeId
                     , user = user
+                    , projectId = route.params.projectId
                     }
             )
 

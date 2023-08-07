@@ -10,6 +10,7 @@ import Components.Icon
 import Components.Input
 import Components.Layout
 import Components.List
+import Components.ListItem
 import Css
 import Dict exposing (Dict)
 import Effect exposing (Effect)
@@ -33,6 +34,7 @@ import Shared
 import String.Extra
 import Supabase.Mutations.CreateProject
 import Supabase.Mutations.CreateProject.Input
+import Supabase.Queries.MyProjects exposing (Project)
 import Supabase.Scalars.UUID
 import View exposing (View)
 
@@ -61,6 +63,7 @@ page user shared route =
 type alias Model =
     { searchQuery : String
     , recentRepos : Response (List Repo)
+    , projects : Response (List Supabase.Queries.MyProjects.Project)
     , searchRepos : Maybe (Response (List Repo))
     , newProject : Maybe (Response Supabase.Mutations.CreateProject.Data)
     }
@@ -73,11 +76,28 @@ type alias Repo =
 init : Auth.User -> () -> ( Model, Effect Msg )
 init user () =
     ( { searchQuery = ""
+      , projects = GraphQL.Response.Loading
       , recentRepos = GraphQL.Response.Loading
       , searchRepos = Nothing
       , newProject = Nothing
       }
-    , case user.github of
+    , Effect.batch
+        [ fetchExistingProjects
+        , fetchRecentRepos user
+        ]
+    )
+
+
+fetchExistingProjects =
+    Effect.sendSupabaseGraphQL
+        { operation = Supabase.Queries.MyProjects.new
+        , onResponse = FetchedExistingProjects
+        }
+
+
+fetchRecentRepos : Auth.User -> Effect Msg
+fetchRecentRepos user =
+    case user.github of
         Just { username } ->
             let
                 input : GitHub.Queries.RecentRepos.Input
@@ -91,11 +111,7 @@ init user () =
                 }
 
         Nothing ->
-            Effect.sendCustomErrorToSentry
-                { message = "Could not fetch recent repos, because user was missing"
-                , details = []
-                }
-    )
+            Effect.none
 
 
 
@@ -105,8 +121,9 @@ init user () =
 type Msg
     = ClickedCreateFirstProject
     | ChangedSearchValue Auth.User.GitHubInfo String
-    | SelectedRepo Int Repo
+    | SelectedRepoForNewProject Int Repo
     | ThrottledSearchRepos { username : String, searchQuery : String }
+    | FetchedExistingProjects (Result Http.Error Supabase.Queries.MyProjects.Data)
     | FetchedRecentRepos String (Result Http.Error GitHub.Queries.RecentRepos.Data)
     | FetchedSearchRepos (Result Http.Error GitHub.Queries.SearchRepos.Data)
     | FetchedCreateNewProject (Result Http.Error Supabase.Mutations.CreateProject.Data)
@@ -165,7 +182,7 @@ update user msg model =
                 Effect.none
             )
 
-        SelectedRepo repoId repo ->
+        SelectedRepoForNewProject repoId repo ->
             let
                 input : Supabase.Mutations.CreateProject.Input
                 input =
@@ -272,6 +289,24 @@ update user msg model =
             , Effect.none
             )
 
+        FetchedExistingProjects (Ok data) ->
+            ( { model
+                | projects =
+                    GraphQL.Response.Success
+                        (data.projects
+                            |> Maybe.map .edges
+                            |> Maybe.map (List.map .node)
+                            |> Maybe.withDefault []
+                        )
+              }
+            , Effect.none
+            )
+
+        FetchedExistingProjects (Err httpError) ->
+            ( { model | projects = GraphQL.Response.Failure httpError }
+            , Effect.none
+            )
+
 
 
 -- SUBSCRIPTIONS
@@ -300,29 +335,110 @@ view : Auth.User -> Model -> View Msg
 view user model =
     { title = "Jangle | Dashboard"
     , body =
-        [ div [ Css.col, Css.fill, Css.align_center ]
-            [ Components.EmptyState.viewCreateYourFirstProject
-                { id = ids.createFirstProjectButton
-                , onClick = ClickedCreateFirstProject
-                }
-            , div [ Css.h_96 ] []
-            ]
-        , Components.Dialog.new
-            { title = "Create a project"
-            , content =
-                [ case user.github of
-                    Nothing ->
-                        text "Connect to GitHub"
+        case model.projects of
+            GraphQL.Response.Loading ->
+                viewCentered
+                    [ Components.EmptyState.viewLoading
+                    ]
 
-                    Just githubInfo ->
-                        viewCreateProjectForm githubInfo model
-                ]
-            }
-            |> Components.Dialog.withSubtitle "Connect to an existing GitHub repository"
-            |> Components.Dialog.withId ids.createProjectDialog
-            |> Components.Dialog.view
-        ]
+            GraphQL.Response.Success projects ->
+                if List.isEmpty projects then
+                    viewCreateFirstProject user model
+
+                else
+                    viewExistingProjects
+                        { projects = projects
+                        , user = user
+                        , model = model
+                        }
+
+            GraphQL.Response.Failure httpError ->
+                viewCentered
+                    [ Components.EmptyState.viewHttpError httpError
+                    ]
     }
+
+
+viewCentered : List (Html Msg) -> List (Html Msg)
+viewCentered contents =
+    [ div [ Css.col, Css.align_center, Css.h_fill ] contents
+    ]
+
+
+viewExistingProjects :
+    { projects : List Project
+    , user : Auth.User
+    , model : Model
+    }
+    -> List (Html Msg)
+viewExistingProjects props =
+    let
+        toListItem : Project -> Components.ListItem.ListItem Msg
+        toListItem project =
+            let
+                path : Route.Path.Path
+                path =
+                    Route.Path.Projects_ProjectId_
+                        { projectId = Supabase.Scalars.UUID.toString project.id
+                        }
+            in
+            Components.ListItem.new
+                { icon = Components.Icon.GitHub
+                , label = project.title
+                }
+                |> Components.ListItem.withHref (Route.Path.toString path)
+    in
+    [ div [ Css.col, Css.h_fill, Css.gap_16, Css.align_center ]
+        [ div [ Css.col, Css.gap_4, Css.text_center ]
+            [ h3 [ Css.font_title ] [ text "Select a project" ]
+            , p [ Css.font_sublabel, Css.color_textSecondary ]
+                [ text "Welcome back! Which project are you working on today?"
+                ]
+            ]
+        , div [ Css.w_fill, Css.mw_320 ]
+            [ Components.List.view
+                { items = List.map toListItem props.projects
+                }
+            ]
+        , Components.Button.new
+            { label = "Create another project"
+            }
+            |> Components.Button.withOnClick ClickedCreateFirstProject
+            |> Components.Button.view
+        ]
+    , viewCreateAProjectDialog props.user props.model
+    ]
+
+
+viewCreateFirstProject : Auth.User -> Model -> List (Html Msg)
+viewCreateFirstProject user model =
+    [ div [ Css.col, Css.fill, Css.align_center ]
+        [ Components.EmptyState.viewCreateYourFirstProject
+            { id = ids.createFirstProjectButton
+            , onClick = ClickedCreateFirstProject
+            }
+        , div [ Css.h_96 ] []
+        ]
+    , viewCreateAProjectDialog user model
+    ]
+
+
+viewCreateAProjectDialog : Auth.User -> Model -> Html Msg
+viewCreateAProjectDialog user model =
+    Components.Dialog.new
+        { title = "Create a project"
+        , content =
+            [ case user.github of
+                Nothing ->
+                    text "Connect to GitHub"
+
+                Just githubInfo ->
+                    viewCreateProjectForm githubInfo model
+            ]
+        }
+        |> Components.Dialog.withSubtitle "Connect to an existing GitHub repository"
+        |> Components.Dialog.withId ids.createProjectDialog
+        |> Components.Dialog.view
 
 
 viewCreateProjectForm : Auth.User.GitHubInfo -> Model -> Html Msg
@@ -381,6 +497,24 @@ viewCreateProjectForm githubInfo model =
 
                 GraphQL.Response.Success repos ->
                     Components.List.view { items = List.filterMap toListItem repos }
+
+        toListItem : Repo -> Maybe (Components.ListItem.ListItem Msg)
+        toListItem repo =
+            case repo.databaseId of
+                Nothing ->
+                    Nothing
+
+                Just repoId ->
+                    Components.ListItem.new
+                        { icon = Components.Icon.GitHub
+                        , label = repo.nameWithOwner
+                        }
+                        |> Components.ListItem.withOnClick
+                            (SelectedRepoForNewProject
+                                repoId
+                                repo
+                            )
+                        |> Just
     in
     div [ Css.col, Css.gap_16 ]
         [ viewRepoNameSearchField
@@ -398,17 +532,3 @@ viewCreateProjectForm githubInfo model =
             Just (GraphQL.Response.Success repos) ->
                 Components.EmptyState.viewLoading
         ]
-
-
-toListItem : Repo -> Maybe (Components.List.Item Msg)
-toListItem repo =
-    case repo.databaseId of
-        Nothing ->
-            Nothing
-
-        Just repoId ->
-            Just
-                { icon = Components.Icon.GitHub
-                , label = repo.nameWithOwner
-                , onClick = SelectedRepo repoId repo
-                }

@@ -12,6 +12,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class)
 import Layout exposing (Layout)
 import Route exposing (Route)
+import Route.Path
 import Shared
 import View exposing (View)
 
@@ -19,10 +20,15 @@ import View exposing (View)
 type alias Props =
     { title : String
     , user : Auth.User.User
+    , projectId : String
     }
 
 
-layout : Props -> Shared.Model -> Route () -> Layout () Model Msg contentMsg
+layout :
+    Props
+    -> Shared.Model
+    -> Route ()
+    -> Layout () Model Msg contentMsg
 layout props shared route =
     Layout.new
         { init = init
@@ -88,17 +94,8 @@ view props route { toContentMsg, model, content } =
                 { current = route.path
                 , user = props.user
                 , onUserControlsClick = toContentMsg ClickedUserControls
-                , project = { id = "portfolio", name = "Portfolio Site" }
-                , contentLinks =
-                    [ { typeId = "blog-posts"
-                      , icon = Components.Icon.Edit
-                      , label = "Blog posts"
-                      }
-                    , { typeId = "contact-info"
-                      , icon = Components.Icon.Page
-                      , label = "Contact Info"
-                      }
-                    ]
+                , projectId = props.projectId
+                , contentLinks = []
                 }
     in
     { title = content.title

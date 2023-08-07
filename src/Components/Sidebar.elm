@@ -17,6 +17,7 @@ import Components.SidebarLinkGroup
 import Components.UserControls
 import Css
 import Html exposing (..)
+import Html.Extra
 import Route.Path exposing (Path)
 
 
@@ -28,7 +29,7 @@ type Sidebar msg
             , email : String
             , image : Maybe String
             }
-        , project : { id : String, name : String }
+        , projectId : String
         , onUserControlsClick : msg
         , contentLinks :
             List
@@ -48,7 +49,7 @@ new :
             , image : Maybe String
         }
     , onUserControlsClick : msg
-    , project : { id : String, name : String }
+    , projectId : String
     , contentLinks :
         List
             { icon : Icon
@@ -60,8 +61,8 @@ new :
 new props =
     Sidebar
         { current = props.current
-        , project = props.project
         , contentLinks = props.contentLinks
+        , projectId = props.projectId
         , onUserControlsClick = props.onUserControlsClick
         , user =
             { name = props.user.name
@@ -84,6 +85,12 @@ view (Sidebar props) =
                 ]
                 [ Components.JangleLogo.viewSmall ]
 
+        dashboardRoute : Path
+        dashboardRoute =
+            Route.Path.Projects_ProjectId_
+                { projectId = props.projectId
+                }
+
         viewTopLinks : Html msg
         viewTopLinks =
             div [ Css.col, Css.gap_16, Css.scroll ]
@@ -91,13 +98,17 @@ view (Sidebar props) =
                     { icon = Components.Icon.Home
                     , label = "Dashboard"
                     }
-                    |> Components.SidebarLink.withRoutePath Route.Path.Home_
-                    |> Components.SidebarLink.withSelectedStyle (Route.Path.Home_ == props.current)
+                    |> Components.SidebarLink.withRoutePath dashboardRoute
+                    |> Components.SidebarLink.withSelectedStyle (dashboardRoute == props.current)
                     |> Components.SidebarLink.view
-                , Components.SidebarLinkGroup.view
-                    { title = "Content"
-                    , links = List.map viewContentLink props.contentLinks
-                    }
+                , if List.isEmpty props.contentLinks then
+                    Html.Extra.nothing
+
+                  else
+                    Components.SidebarLinkGroup.view
+                        { title = "Content"
+                        , links = List.map viewContentLink props.contentLinks
+                        }
                 ]
 
         viewContentLink : ContentLink -> SidebarLink
@@ -106,7 +117,7 @@ view (Sidebar props) =
                 routePath : Path
                 routePath =
                     Route.Path.Projects_ProjectId__Content_TypeId_
-                        { projectId = props.project.id
+                        { projectId = props.projectId
                         , typeId = link.typeId
                         }
             in
