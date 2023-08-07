@@ -7,11 +7,16 @@ import Components.Icon
 import Components.Layout
 import Css
 import Effect exposing (Effect)
+import GraphQL.Response exposing (Response)
 import Html exposing (..)
+import Http
 import Layouts
 import Page exposing (Page)
 import Route exposing (Route)
 import Shared
+import Supabase.Queries.FindProject exposing (Project)
+import Supabase.Queries.FindProject.Input
+import Supabase.Scalars.UUID
 import View exposing (View)
 
 
@@ -22,15 +27,15 @@ page :
     -> Page Model Msg
 page user shared route =
     Page.new
-        { init = init
+        { init = init route
         , update = update
         , subscriptions = subscriptions
-        , view = view route
+        , view = view
         }
         |> Page.withLayout
             (\_ ->
                 Layouts.Sidebar
-                    { title = "Project"
+                    { title = "Dashboard"
                     , user = user
                     , projectId = route.params.projectId
                     }
@@ -42,13 +47,23 @@ page user shared route =
 
 
 type alias Model =
-    {}
+    { project : Response Project
+    }
 
 
-init : () -> ( Model, Effect Msg )
-init () =
-    ( {}
-    , Effect.none
+init : Route { projectId : String } -> () -> ( Model, Effect Msg )
+init route () =
+    ( { project = GraphQL.Response.Loading }
+    , let
+        input : Supabase.Queries.FindProject.Input
+        input =
+            Supabase.Queries.FindProject.Input.new
+                |> Supabase.Queries.FindProject.Input.id (Supabase.Scalars.UUID.fromString route.params.projectId)
+      in
+      Effect.sendSupabaseGraphQL
+        { operation = Supabase.Queries.FindProject.new input
+        , onResponse = FetchedProjectDetails
+        }
     )
 
 
@@ -58,6 +73,7 @@ init () =
 
 type Msg
     = ClickedCreateFirstContentType
+    | FetchedProjectDetails (Result Http.Error Supabase.Queries.FindProject.Data)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -69,6 +85,29 @@ update msg model =
                 { id = ids.createContentTypeDialog
                 }
             )
+
+        FetchedProjectDetails (Ok data) ->
+            ( case toProject data of
+                Just project ->
+                    { model | project = GraphQL.Response.Success project }
+
+                Nothing ->
+                    { model | project = GraphQL.Response.Failure (Http.BadStatus 404) }
+            , Effect.none
+            )
+
+        FetchedProjectDetails (Err httpError) ->
+            ( { model | project = GraphQL.Response.Failure httpError }
+            , Effect.none
+            )
+
+
+toProject : Supabase.Queries.FindProject.Data -> Maybe Project
+toProject data =
+    data.projects
+        |> Maybe.map .edges
+        |> Maybe.andThen List.head
+        |> Maybe.map .node
 
 
 
@@ -91,21 +130,40 @@ ids =
 
 
 view :
-    Route { projectId : String }
-    -> Model
+    Model
     -> View Msg
-view route model =
-    { title = "Jangle | Project"
+view model =
+    { title =
+        case model.project of
+            GraphQL.Response.Loading ->
+                "Jangle"
+
+            GraphQL.Response.Success project ->
+                "Jangle • " ++ project.title
+
+            GraphQL.Response.Failure _ ->
+                "Jangle"
     , body =
-        [ div [ Css.col, Css.h_fill, Css.w_fill, Css.pad_32, Css.align_center ]
-            [ Components.EmptyState.viewCreateYourFirstContentType
-                { id = ids.createContentTypeButton
-                , onClick = ClickedCreateFirstContentType
-                }
-            ]
-        , viewCreateContentTypeDialog model
-        ]
+        viewCreateYourFirstContentType model
     }
+
+
+viewCreateYourFirstContentType : Model -> List (Html Msg)
+viewCreateYourFirstContentType model =
+    [ div
+        [ Css.col
+        , Css.fill
+        , Css.w_fill
+        , Css.pad_32
+        , Css.align_center
+        ]
+        [ Components.EmptyState.viewCreateYourFirstContentType
+            { id = ids.createContentTypeButton
+            , onClick = ClickedCreateFirstContentType
+            }
+        ]
+    , viewCreateContentTypeDialog model
+    ]
 
 
 viewCreateContentTypeDialog : Model -> Html Msg

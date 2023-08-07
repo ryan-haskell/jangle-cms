@@ -274,14 +274,19 @@ update user msg model =
 
                 project :: _ ->
                     ( { model | newProject = Just (GraphQL.Response.Success data) }
-                    , Effect.pushRoute
-                        { path =
-                            Route.Path.Projects_ProjectId_
-                                { projectId = Supabase.Scalars.UUID.toString project.id
-                                }
-                        , query = Dict.empty
-                        , hash = Nothing
-                        }
+                    , Effect.batch
+                        [ Effect.hideDialog
+                            { id = ids.createProjectDialog
+                            }
+                        , Effect.pushRoute
+                            { path =
+                                Route.Path.Projects_ProjectId_
+                                    { projectId = Supabase.Scalars.UUID.toString project.id
+                                    }
+                            , query = Dict.empty
+                            , hash = Nothing
+                            }
+                        ]
                     )
 
         FetchedCreateNewProject (Err httpError) ->

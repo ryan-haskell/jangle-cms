@@ -32,11 +32,17 @@ export const onReady = ({ app, env }) => {
           Storage.save(data)
           break
         case 'SHOW_DIALOG':
-          let dialog = document.getElementById(data.id)
+          var dialog = document.getElementById(data.id)
           if (dialog && dialog.showModal) {
             dialog.showModal()
           }
-          break
+          return
+        case 'HIDE_DIALOG':
+          var dialog = document.getElementById(data.id)
+          if (dialog && dialog.close) {
+            dialog.close()
+          }
+          return
         case 'SENTRY_REPORT_HTTP_ERROR':
           return ErrorReporting.sendHttpError(data)
         case 'SENTRY_REPORT_JSON_ERROR':

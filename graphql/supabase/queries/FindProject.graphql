@@ -1,0 +1,15 @@
+query FindProject($id: UUID!) {
+  projects: projectsCollection(filter: {id: {eq: $id}}) {
+    edges {
+      node {
+        ...Project
+      }
+    }
+  }
+}
+
+fragment Project on projects {
+  id
+  title
+  github_repo_id
+}

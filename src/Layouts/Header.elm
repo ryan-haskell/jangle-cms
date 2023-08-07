@@ -8,10 +8,12 @@ import Components.Icon
 import Components.Layout
 import Components.UserControls
 import Css
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html exposing (..)
 import Layout exposing (Layout)
 import Route exposing (Route)
+import Route.Path
 import Shared
 import View exposing (View)
 
@@ -54,6 +56,7 @@ init _ =
 type Msg
     = ClickedUserControls
     | ClickedSignOut
+    | ClickedSwitchProjects
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -69,6 +72,19 @@ update msg model =
         ClickedSignOut ->
             ( model
             , Effect.signOut
+            )
+
+        ClickedSwitchProjects ->
+            ( model
+            , Effect.batch
+                [ Effect.pushRoute
+                    { path = Route.Path.Home_
+                    , query = Dict.empty
+                    , hash = Nothing
+                    }
+                , Effect.hideDialog
+                    { id = Components.Dialog.UserSettings.id }
+                ]
             )
 
 
@@ -107,7 +123,9 @@ view props route { toContentMsg, model, content } =
             |> Components.Layout.view
         , Components.Dialog.UserSettings.view
             { user = props.user
+            , hasCurrentProject = False
             , onSignOutClick = toContentMsg ClickedSignOut
+            , onSwitchProjectsClick = toContentMsg ClickedSwitchProjects
             }
         ]
     }

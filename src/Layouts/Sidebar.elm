@@ -2,11 +2,13 @@ module Layouts.Sidebar exposing (Model, Msg, Props, layout)
 
 import Auth.User
 import Components.Button
+import Components.Dialog.UserSettings
 import Components.Header
 import Components.Icon
 import Components.Layout
 import Components.Sidebar
 import Css
+import Dict exposing (Dict)
 import Effect exposing (Effect)
 import Html exposing (..)
 import Html.Attributes exposing (class)
@@ -59,6 +61,8 @@ init _ =
 
 type Msg
     = ClickedUserControls
+    | ClickedSignOut
+    | ClickedSwitchProjects
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -66,7 +70,27 @@ update msg model =
     case msg of
         ClickedUserControls ->
             ( model
-            , Effect.none
+            , Effect.showDialog
+                { id = Components.Dialog.UserSettings.id
+                }
+            )
+
+        ClickedSignOut ->
+            ( model
+            , Effect.signOut
+            )
+
+        ClickedSwitchProjects ->
+            ( model
+            , Effect.batch
+                [ Effect.pushRoute
+                    { path = Route.Path.Home_
+                    , query = Dict.empty
+                    , hash = Nothing
+                    }
+                , Effect.hideDialog
+                    { id = Components.Dialog.UserSettings.id }
+                ]
             )
 
 
@@ -106,5 +130,11 @@ view props route { toContentMsg, model, content } =
             |> Components.Layout.withHeader header
             |> Components.Layout.withSidebar sidebar
             |> Components.Layout.view
+        , Components.Dialog.UserSettings.view
+            { user = props.user
+            , hasCurrentProject = True
+            , onSignOutClick = toContentMsg ClickedSignOut
+            , onSwitchProjectsClick = toContentMsg ClickedSwitchProjects
+            }
         ]
     }
