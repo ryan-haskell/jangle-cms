@@ -1,0 +1,10 @@
+query GetDefaultBranchInfo($owner: String!, $name: String!) {
+  repository(name: $name, owner: $owner) {
+    defaultBranchRef {
+      id
+      target {
+        oid
+      }
+    }
+  }
+}
