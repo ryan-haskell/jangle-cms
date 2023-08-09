@@ -14,17 +14,25 @@ import Components.ListItem
 import Css
 import Dict exposing (Dict)
 import Effect exposing (Effect)
+import GitHub.Mutations.UpdateFile
+import GitHub.Mutations.UpdateFile.Input
+import GitHub.Queries.DefaultBranchInfo
+import GitHub.Queries.DefaultBranchInfo.Input
 import GitHub.Queries.RecentRepos
 import GitHub.Queries.RecentRepos.Input
 import GitHub.Queries.SearchRepos
 import GitHub.Queries.SearchRepos.Input
 import GitHub.Queries.SearchRepos.SearchResultItem as SearchResultItem
+import GitHub.Scalars.Base64String
+import GitHub.Scalars.GitObjectID
 import GraphQL.Relay
 import GraphQL.Response exposing (Response)
+import GraphQL.Scalar.Id
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events
 import Http
+import Jangle.Settings
 import Json.Encode
 import Layouts
 import Page exposing (Page)
@@ -66,6 +74,8 @@ type alias Model =
     , projects : Response (List Supabase.Queries.MyProjects.Project)
     , searchRepos : Maybe (Response (List Repo))
     , newProject : Maybe (Response Supabase.Mutations.CreateProject.Data)
+    , newProjectBranchInfo : Maybe (Response GitHub.Queries.DefaultBranchInfo.Data)
+    , newProjectUpdatedFile : Maybe (Response GitHub.Mutations.UpdateFile.Data)
     }
 
 
@@ -80,6 +90,8 @@ init user () =
       , recentRepos = GraphQL.Response.Loading
       , searchRepos = Nothing
       , newProject = Nothing
+      , newProjectBranchInfo = Nothing
+      , newProjectUpdatedFile = Nothing
       }
     , Effect.batch
         [ fetchExistingProjects
@@ -88,6 +100,7 @@ init user () =
     )
 
 
+fetchExistingProjects : Effect Msg
 fetchExistingProjects =
     Effect.sendSupabaseGraphQL
         { operation = Supabase.Queries.MyProjects.new
@@ -121,12 +134,27 @@ fetchRecentRepos user =
 type Msg
     = ClickedCreateFirstProject
     | ChangedSearchValue Auth.User.GitHubInfo String
-    | SelectedRepoForNewProject Int Repo
+    | SelectedRepoForNewProject
+        { repoId : Int
+        , owner : String
+        , repo : Repo
+        }
     | ThrottledSearchRepos { username : String, searchQuery : String }
     | FetchedExistingProjects (Result Http.Error Supabase.Queries.MyProjects.Data)
     | FetchedRecentRepos String (Result Http.Error GitHub.Queries.RecentRepos.Data)
     | FetchedSearchRepos (Result Http.Error GitHub.Queries.SearchRepos.Data)
-    | FetchedCreateNewProject (Result Http.Error Supabase.Mutations.CreateProject.Data)
+    | FetchedCreateNewProject
+        { owner : String
+        , repo : Repo
+        }
+        (Result Http.Error Supabase.Mutations.CreateProject.Data)
+    | FetchedDefaultBranchInfo
+        { projectId : Supabase.Scalars.UUID.UUID
+        , repo : Repo
+        }
+        (Result Http.Error GitHub.Queries.DefaultBranchInfo.Data)
+    | FetchedUpdateFile Supabase.Scalars.UUID.UUID (Result Http.Error GitHub.Mutations.UpdateFile.Data)
+    | ClickedTryAgain
 
 
 update : Auth.User -> Msg -> Model -> ( Model, Effect Msg )
@@ -182,7 +210,7 @@ update user msg model =
                 Effect.none
             )
 
-        SelectedRepoForNewProject repoId repo ->
+        SelectedRepoForNewProject { repoId, owner, repo } ->
             let
                 input : Supabase.Mutations.CreateProject.Input
                 input =
@@ -194,8 +222,39 @@ update user msg model =
             ( { model | newProject = Just GraphQL.Response.Loading }
             , Effect.sendSupabaseGraphQL
                 { operation = Supabase.Mutations.CreateProject.new input
-                , onResponse = FetchedCreateNewProject
+                , onResponse =
+                    FetchedCreateNewProject
+                        { owner = owner
+                        , repo = repo
+                        }
                 }
+            )
+
+        ClickedTryAgain ->
+            ( { model
+                | newProject = Nothing
+                , newProjectBranchInfo = Nothing
+                , newProjectUpdatedFile = Nothing
+              }
+            , Effect.none
+            )
+
+        FetchedExistingProjects (Ok data) ->
+            ( { model
+                | projects =
+                    GraphQL.Response.Success
+                        (data.projects
+                            |> Maybe.map .edges
+                            |> Maybe.map (List.map .node)
+                            |> Maybe.withDefault []
+                        )
+              }
+            , Effect.none
+            )
+
+        FetchedExistingProjects (Err httpError) ->
+            ( { model | projects = GraphQL.Response.Failure httpError }
+            , Effect.none
             )
 
         FetchedRecentRepos username (Ok data) ->
@@ -260,7 +319,7 @@ update user msg model =
             , Effect.none
             )
 
-        FetchedCreateNewProject (Ok data) ->
+        FetchedCreateNewProject info (Ok data) ->
             case data.projects.records of
                 [] ->
                     ( { model
@@ -273,44 +332,137 @@ update user msg model =
                     )
 
                 project :: _ ->
-                    ( { model | newProject = Just (GraphQL.Response.Success data) }
-                    , Effect.batch
-                        [ Effect.hideDialog
-                            { id = ids.createProjectDialog
-                            }
-                        , Effect.pushRoute
-                            { path =
-                                Route.Path.Projects_ProjectId_
-                                    { projectId = Supabase.Scalars.UUID.toString project.id
-                                    }
-                            , query = Dict.empty
-                            , hash = Nothing
-                            }
-                        ]
+                    ( { model
+                        | newProject = Just (GraphQL.Response.Success data)
+                        , newProjectBranchInfo = Just GraphQL.Response.Loading
+                      }
+                    , fetchDefaultBranchInfo
+                        { projectId = project.id
+                        , owner = info.owner
+                        , repo = info.repo
+                        }
                     )
 
-        FetchedCreateNewProject (Err httpError) ->
+        FetchedCreateNewProject info (Err httpError) ->
             ( { model | newProject = Just (GraphQL.Response.Failure httpError) }
             , Effect.none
             )
 
-        FetchedExistingProjects (Ok data) ->
+        FetchedDefaultBranchInfo info (Ok data) ->
+            let
+                showProblem : String -> ( Model, Effect Msg )
+                showProblem problem =
+                    ( { model | newProjectBranchInfo = Just (GraphQL.Response.Failure (Http.BadBody problem)) }
+                    , Effect.none
+                    )
+            in
+            case data.repository of
+                Nothing ->
+                    showProblem "Expected a repository to be found"
+
+                Just repo ->
+                    case repo.defaultBranchRef of
+                        Nothing ->
+                            showProblem "No default branch found"
+
+                        Just branch ->
+                            case branch.target of
+                                Nothing ->
+                                    showProblem "No commit found for default branch"
+
+                                Just target ->
+                                    ( { model | newProjectBranchInfo = Just (GraphQL.Response.Success data) }
+                                    , createNewJangleSettingsFile
+                                        { repo = info.repo
+                                        , projectId = info.projectId
+                                        , branchId = branch.id
+                                        , expectedHeadOid = target.oid
+                                        }
+                                    )
+
+        FetchedDefaultBranchInfo info (Err httpError) ->
             ( { model
-                | projects =
-                    GraphQL.Response.Success
-                        (data.projects
-                            |> Maybe.map .edges
-                            |> Maybe.map (List.map .node)
-                            |> Maybe.withDefault []
-                        )
+                | newProjectBranchInfo = Just (GraphQL.Response.Failure httpError)
               }
             , Effect.none
             )
 
-        FetchedExistingProjects (Err httpError) ->
-            ( { model | projects = GraphQL.Response.Failure httpError }
+        FetchedUpdateFile projectId (Ok data) ->
+            ( { model | newProjectUpdatedFile = Just (GraphQL.Response.Success data) }
+            , Effect.batch
+                [ Effect.hideDialog
+                    { id = ids.createProjectDialog
+                    }
+                , Effect.pushRoute
+                    { path =
+                        Route.Path.Projects_ProjectId_
+                            { projectId = Supabase.Scalars.UUID.toString projectId
+                            }
+                    , query = Dict.empty
+                    , hash = Nothing
+                    }
+                ]
+            )
+
+        FetchedUpdateFile projectId (Err httpError) ->
+            ( { model | newProjectUpdatedFile = Just (GraphQL.Response.Failure httpError) }
             , Effect.none
             )
+
+
+fetchDefaultBranchInfo :
+    { projectId : Supabase.Scalars.UUID.UUID
+    , owner : String
+    , repo : Repo
+    }
+    -> Effect Msg
+fetchDefaultBranchInfo props =
+    let
+        input : GitHub.Queries.DefaultBranchInfo.Input
+        input =
+            GitHub.Queries.DefaultBranchInfo.Input.new
+                |> GitHub.Queries.DefaultBranchInfo.Input.owner props.owner
+                |> GitHub.Queries.DefaultBranchInfo.Input.name props.repo.name
+    in
+    Effect.sendGitHubGraphQL
+        { operation = GitHub.Queries.DefaultBranchInfo.new input
+        , onResponse =
+            FetchedDefaultBranchInfo
+                { projectId = props.projectId
+                , repo = props.repo
+                }
+        }
+
+
+createNewJangleSettingsFile :
+    { projectId : Supabase.Scalars.UUID.UUID
+    , repo : Repo
+    , branchId : GraphQL.Scalar.Id.Id
+    , expectedHeadOid : GitHub.Scalars.GitObjectID.GitObjectID
+    }
+    -> Effect Msg
+createNewJangleSettingsFile props =
+    let
+        settingsJsonContents : GitHub.Scalars.Base64String.Base64String
+        settingsJsonContents =
+            Jangle.Settings.new { title = props.repo.name }
+                |> Jangle.Settings.encode
+                |> Json.Encode.encode 2
+                |> GitHub.Scalars.Base64String.fromString
+
+        input : GitHub.Mutations.UpdateFile.Input
+        input =
+            GitHub.Mutations.UpdateFile.Input.new
+                |> GitHub.Mutations.UpdateFile.Input.branchId props.branchId
+                |> GitHub.Mutations.UpdateFile.Input.expectedHeadOid props.expectedHeadOid
+                |> GitHub.Mutations.UpdateFile.Input.message "🐶 Jangle – Created project settings"
+                |> GitHub.Mutations.UpdateFile.Input.path ".jangle/settings.json"
+                |> GitHub.Mutations.UpdateFile.Input.contents settingsJsonContents
+    in
+    Effect.sendGitHubGraphQL
+        { operation = GitHub.Mutations.UpdateFile.new input
+        , onResponse = FetchedUpdateFile props.projectId
+        }
 
 
 
@@ -516,24 +668,68 @@ viewCreateProjectForm githubInfo model =
                         }
                         |> Components.ListItem.withOnClick
                             (SelectedRepoForNewProject
-                                repoId
-                                repo
+                                { repoId = repoId
+                                , owner = githubInfo.username
+                                , repo = repo
+                                }
                             )
                         |> Just
+
+        viewErrorWithTryAgainButton : Http.Error -> Html Msg
+        viewErrorWithTryAgainButton httpError =
+            div [ Css.col, Css.gap_16 ]
+                [ Components.EmptyState.viewHttpError httpError
+                , Components.Button.new { label = "Try again" }
+                    |> Components.Button.withOnClick ClickedTryAgain
+                    |> Components.Button.view
+                ]
+
+        viewOptionsOrRequestStatus : Html Msg
+        viewOptionsOrRequestStatus =
+            case model.newProject of
+                Nothing ->
+                    viewRepoOptions
+
+                Just GraphQL.Response.Loading ->
+                    Components.EmptyState.viewLoading
+
+                Just (GraphQL.Response.Failure httpError) ->
+                    viewErrorWithTryAgainButton httpError
+
+                Just (GraphQL.Response.Success repos) ->
+                    viewStatusOfBranchInfoRequest
+
+        viewStatusOfBranchInfoRequest : Html Msg
+        viewStatusOfBranchInfoRequest =
+            case model.newProjectBranchInfo of
+                Nothing ->
+                    Components.EmptyState.viewLoading
+
+                Just GraphQL.Response.Loading ->
+                    Components.EmptyState.viewLoading
+
+                Just (GraphQL.Response.Failure httpError) ->
+                    viewErrorWithTryAgainButton httpError
+
+                Just (GraphQL.Response.Success data) ->
+                    viewStatusOfUpdateFileRequest
+
+        viewStatusOfUpdateFileRequest : Html Msg
+        viewStatusOfUpdateFileRequest =
+            case model.newProjectUpdatedFile of
+                Nothing ->
+                    Components.EmptyState.viewLoading
+
+                Just GraphQL.Response.Loading ->
+                    Components.EmptyState.viewLoading
+
+                Just (GraphQL.Response.Failure httpError) ->
+                    viewErrorWithTryAgainButton httpError
+
+                Just (GraphQL.Response.Success data) ->
+                    Components.EmptyState.viewLoading
     in
     div [ Css.col, Css.gap_16 ]
         [ viewRepoNameSearchField
-        , case model.newProject of
-            Nothing ->
-                viewRepoOptions
-
-            Just GraphQL.Response.Loading ->
-                Components.EmptyState.viewLoading
-
-            Just (GraphQL.Response.Failure httpError) ->
-                -- TODO: Show a "Try again" option
-                Components.EmptyState.viewHttpError httpError
-
-            Just (GraphQL.Response.Success repos) ->
-                Components.EmptyState.viewLoading
+        , viewOptionsOrRequestStatus
         ]

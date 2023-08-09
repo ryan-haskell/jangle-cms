@@ -36,7 +36,11 @@ type Msg
 view : Controls -> Html Msg
 view controls =
     Components.Sidebar.new
-        { current = Route.Path.Home_
+        { current =
+            Route.Path.Projects_ProjectId__Content_TypeId_
+                { projectId = "123"
+                , typeId = "homepage"
+                }
         , user =
             { image = Just "https://avatars.githubusercontent.com/u/6187256?v=4"
             , name = "Ryan Haskell-Glatz"

@@ -17,7 +17,9 @@
             "elm-community/html-extra": "3.4.0",
             "elm-community/json-extra": "4.3.0",
             "elm-community/string-extra": "4.0.1",
-            "ryannhg/graphql": "1.0.0"
+            "miniBill/elm-codec": "2.0.0",
+            "ryannhg/graphql": "1.0.0",
+            "truqu/elm-base64": "2.0.4"
         },
         "indirect": {
             "elm/bytes": "1.0.8",

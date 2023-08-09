@@ -621,7 +621,8 @@ toCmd options effect =
                     sendHttpWithErrorReporting options
                         { method = "POST"
                         , headers =
-                            [ Http.header
+                            [ Http.header "X-Github-Next-Global-ID" "1"
+                            , Http.header
                                 "Authorization"
                                 ("Bearer " ++ user.token)
                             ]
