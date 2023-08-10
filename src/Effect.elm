@@ -8,6 +8,7 @@ port module Effect exposing
     , signIn, signOut
     , saveOAuthResponse, clearOAuthResponse
     , showDialog, hideDialog
+    , hidePopover
     , sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
     , sendGitHubGraphQL
     , sendSupabaseGraphQL
@@ -32,6 +33,7 @@ port module Effect exposing
 @docs saveOAuthResponse, clearOAuthResponse
 
 @docs showDialog, hideDialog
+@docs hidePopover
 
 @docs sendHttpErrorToSentry, sendJsonErrorToSentry, sendCustomErrorToSentry
 
@@ -89,6 +91,8 @@ type Effect msg
       -- DIALOGS
     | ShowDialog { id : String }
     | HideDialog { id : String }
+      -- POPOVERS
+    | HidePopover { id : String }
       -- GITHUB GRAPHQL
     | SendGitHubGraphQL (Operation msg)
       -- SENTRY ERROR REPORTING
@@ -314,6 +318,15 @@ hideDialog { id } =
 
 
 
+-- POPOVER
+
+
+hidePopover : { id : String } -> Effect msg
+hidePopover { id } =
+    HidePopover { id = id }
+
+
+
 -- GRAPHQL
 
 
@@ -428,6 +441,9 @@ map fn effect =
 
         HideDialog data ->
             HideDialog data
+
+        HidePopover data ->
+            HidePopover data
 
         SendGitHubGraphQL operation ->
             SendGitHubGraphQL (mapOperation fn operation)
@@ -565,6 +581,15 @@ toCmd options effect =
         HideDialog { id } ->
             outgoing
                 { tag = "HIDE_DIALOG"
+                , data =
+                    Json.Encode.object
+                        [ ( "id", Json.Encode.string id )
+                        ]
+                }
+
+        HidePopover { id } ->
+            outgoing
+                { tag = "HIDE_POPOVER"
                 , data =
                     Json.Encode.object
                         [ ( "id", Json.Encode.string id )

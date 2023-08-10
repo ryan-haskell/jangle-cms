@@ -2,6 +2,7 @@ module Components.Input exposing
     ( Input, new
     , withOnInput
     , withStyleSearch, withStyleMultiline
+    , withId
     , withError
     , withWidthFill
     , view
@@ -12,6 +13,7 @@ module Components.Input exposing
 @docs Input, new
 @docs withOnInput
 @docs withStyleSearch, withStyleMultiline
+@docs withId
 @docs withError
 @docs withWidthFill
 
@@ -34,6 +36,7 @@ type Input msg
         , hasError : Bool
         , onInput : Maybe (String -> msg)
         , isWidthFill : Bool
+        , id : Maybe String
         }
 
 
@@ -51,6 +54,7 @@ new props =
         , hasError = False
         , onInput = Nothing
         , isWidthFill = False
+        , id = Nothing
         }
 
 
@@ -67,6 +71,11 @@ withStyleMultiline (Input props) =
 withOnInput : (String -> msg) -> Input msg -> Input msg
 withOnInput onInput (Input props) =
     Input { props | onInput = Just onInput }
+
+
+withId : String -> Input msg -> Input msg
+withId id (Input props) =
+    Input { props | id = Just id }
 
 
 withError : Bool -> Input msg -> Input msg
@@ -99,15 +108,23 @@ view (Input props) =
             Html.Attributes.Extra.attributeIf
                 props.isWidthFill
                 Css.w_fill
+
+        idAttr : Html.Attribute msg
+        idAttr =
+            Html.Attributes.Extra.attributeMaybe
+                Attr.id
+                props.id
     in
     case props.style of
         Text ->
             input
                 [ Css.input
+                , Attr.autocomplete False
                 , Attr.value props.value
                 , onInputAttribute
                 , errorAttribute
                 , widthAttr
+                , idAttr
                 ]
                 []
 
@@ -125,12 +142,14 @@ view (Input props) =
                     ]
                 , input
                     [ Css.input
+                    , Attr.autocomplete False
                     , Css.padLeft_40
                     , Attr.value props.value
                     , onInputAttribute
                     , errorAttribute
                     , Attr.type_ "search"
                     , widthAttr
+                    , idAttr
                     ]
                     []
                 ]
@@ -138,10 +157,12 @@ view (Input props) =
         Multiline ->
             textarea
                 [ Css.textarea
+                , Attr.autocomplete False
                 , Attr.rows 5
                 , Attr.value props.value
                 , onInputAttribute
                 , errorAttribute
                 , widthAttr
+                , idAttr
                 ]
                 []
