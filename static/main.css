@@ -243,6 +243,10 @@ dialog::backdrop {
   min-height: var(--px_40);
 }
 
+.not_selectable {
+  user-select: none;
+}
+
 .input {
   padding-left: var(--px_12);
   padding-right: var(--px_12);

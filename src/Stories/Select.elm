@@ -11,7 +11,7 @@ import Storybook.Controls
 
 
 type alias Controls =
-    { variant : Maybe Variant
+    { canCreateNewOption : Bool
     }
 
 
@@ -22,12 +22,7 @@ type Variant
 decoder : Storybook.Controls.Decoder Controls
 decoder =
     Storybook.Controls.new Controls
-        |> Storybook.Controls.withSelect
-            { id = "variant"
-            , options =
-                [ ( "CreateAProject", CreateAProject )
-                ]
-            }
+        |> Storybook.Controls.withBoolean { id = "canCreateNewOption" }
 
 
 main : Storybook.Component.Component Controls Model Msg
@@ -111,12 +106,24 @@ subscriptions controls model =
 
 view : Controls -> Model -> Html Msg
 view controls model =
+    let
+        withCanCreateNewOption : Components.Select.Select Item Msg -> Components.Select.Select Item Msg
+        withCanCreateNewOption select =
+            if controls.canCreateNewOption then
+                select
+                    |> Components.Select.withCreateNewOption
+                        { fromLabel = identity
+                        }
+
+            else
+                select
+    in
     Components.Select.new
         { id = "select__demo"
         , model = model.select
         , toLabel = identity
-        , fromLabel = identity
         , toMsg = SelectSent
         }
+        |> withCanCreateNewOption
         |> Components.Select.withOnChange SelectedChoice
         |> Components.Select.view

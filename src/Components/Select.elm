@@ -1,6 +1,7 @@
 module Components.Select exposing
     ( Select, new
     , withOnChange
+    , withCreateNewOption
     , Model, init
     , toSelectedItem
     , Msg, update
@@ -11,6 +12,7 @@ module Components.Select exposing
 
 @docs Select, new
 @docs withOnChange
+@docs withCreateNewOption
 
 @docs Model, init
 @docs toSelectedItem
@@ -45,9 +47,9 @@ type Select item msg
         { id : String
         , model : Model item
         , toLabel : item -> String
-        , fromLabel : String -> item
         , toMsg : Msg item msg -> msg
         , onChange : Maybe (Maybe item -> msg)
+        , fromLabel : Maybe (String -> item)
         }
 
 
@@ -55,7 +57,6 @@ new :
     { id : String
     , model : Model item
     , toLabel : item -> String
-    , fromLabel : String -> item
     , toMsg : Msg item msg -> msg
     }
     -> Select item msg
@@ -64,9 +65,9 @@ new props =
         { id = props.id
         , model = props.model
         , toLabel = props.toLabel
-        , fromLabel = props.fromLabel
         , toMsg = props.toMsg
         , onChange = Nothing
+        , fromLabel = Nothing
         }
 
 
@@ -77,6 +78,14 @@ new props =
 withOnChange : (Maybe item -> msg) -> Select item msg -> Select item msg
 withOnChange onChange (Select props) =
     Select { props | onChange = Just onChange }
+
+
+withCreateNewOption :
+    { fromLabel : String -> item }
+    -> Select item msg
+    -> Select item msg
+withCreateNewOption options (Select props) =
+    Select { props | fromLabel = Just options.fromLabel }
 
 
 
@@ -403,20 +412,32 @@ view (Select props) =
                 ]
                 []
 
+        canCreateNewOption : Bool
+        canCreateNewOption =
+            props.fromLabel /= Nothing
+
         viewSearchResults : Html msg
         viewSearchResults =
             div [ Css.col ]
-                [ span
-                    [ Css.color_textSecondary
-                    , Css.font_sublabel
-                    , Css.h_32
-                    , Css.pad_16
-                    , Css.col
-                    , Css.align_cy
-                    ]
-                    [ text "Select an option or create one" ]
+                [ if canCreateNewOption then
+                    viewMenuHint "Select an option or create one"
+
+                  else
+                    viewMenuHint "Select an option below"
                 , viewChoices
                 ]
+
+        viewMenuHint : String -> Html msg
+        viewMenuHint hint =
+            span
+                [ Css.color_textSecondary
+                , Css.font_sublabel
+                , Css.h_32
+                , Css.pad_16
+                , Css.col
+                , Css.align_cy
+                ]
+                [ text hint ]
 
         isSelected : Int -> Bool
         isSelected index =
@@ -448,34 +469,40 @@ view (Select props) =
 
         toCreateNewOptionChoice : List (Choice item msg)
         toCreateNewOptionChoice =
-            if
-                String.Extra.isBlank model.search
-                    || List.any ((==) model.search) (List.map props.toLabel model.choices)
-            then
-                []
+            case props.fromLabel of
+                Nothing ->
+                    []
 
-            else
-                let
-                    newItem =
-                        props.fromLabel model.search
-                in
-                [ { label =
-                        "Create \"${search}\""
-                            |> String.replace "${search}" model.search
-                  , onSelect =
-                        SelectedCreateOption
-                            { popoverMenuId = popoverMenuId
-                            , newItem = newItem
-                            , onChange =
-                                case props.onChange of
-                                    Just onChange ->
-                                        Just (onChange (Just newItem))
+                Just fromLabel ->
+                    if
+                        String.Extra.isBlank model.search
+                            || List.any ((==) model.search) (List.map props.toLabel model.choices)
+                    then
+                        []
 
-                                    Nothing ->
-                                        Nothing
-                            }
-                  }
-                ]
+                    else
+                        let
+                            newItem : item
+                            newItem =
+                                fromLabel model.search
+                        in
+                        [ { label =
+                                "Create \"${search}\""
+                                    |> String.replace "${search}" model.search
+                          , onSelect =
+                                SelectedCreateOption
+                                    { popoverMenuId = popoverMenuId
+                                    , newItem = newItem
+                                    , onChange =
+                                        case props.onChange of
+                                            Just onChange ->
+                                                Just (onChange (Just newItem))
+
+                                            Nothing ->
+                                                Nothing
+                                    }
+                          }
+                        ]
 
         toExistingChoicesMatchingQuery : List (Choice item msg)
         toExistingChoicesMatchingQuery =
@@ -508,7 +535,11 @@ view (Select props) =
         renderedChoices =
             List.concat
                 [ toExistingChoicesMatchingQuery
-                , toCreateNewOptionChoice
+                , if canCreateNewOption then
+                    toCreateNewOptionChoice
+
+                  else
+                    []
                 ]
 
         numberOfChoices : Int

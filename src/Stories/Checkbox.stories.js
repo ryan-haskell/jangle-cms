@@ -1,10 +1,10 @@
-import { Elm } from './Select.elm'
+import { Elm } from './Checkbox.elm'
 import { render } from '../../.storybook/render'
 
 // More on how to set up stories at: https://storybook.js.org/docs/7.0/html/writing-stories/introduction
 export default {
-  title: 'Components/Select',
-  render: render(Elm.Stories.Select),
+  title: 'Components/Checkbox',
+  render: render(Elm.Stories.Checkbox),
   parameters: {
     layout: 'centered'
   },
@@ -12,14 +12,6 @@ export default {
 }
 
 // More on writing stories with args: https://storybook.js.org/docs/7.0/html/writing-stories/args
-export const Select = {
-  args: {
-    canCreateNewOption: false
-  }
-}
-
-export const WithCreateNewOption = {
-  args: {
-    canCreateNewOption: true
-  }
+export const Checkbox = {
+  args: {}
 }

@@ -84,29 +84,12 @@ sandbox :
     }
     -> Component controls model msg
 sandbox options =
-    Browser.element
-        { init =
-            init
-                { controls = options.controls
-                , init =
-                    \controls ->
-                        ( options.init controls
-                        , Cmd.none
-                        )
-                }
-        , update =
-            update
-                { update =
-                    \controls msg model ->
-                        ( options.update controls msg model
-                        , Cmd.none
-                        )
-                }
-        , view =
-            view
-                { view = \controls model -> options.view controls model |> Html.map Sent
-                }
-        , subscriptions = \_ -> Sub.none
+    new
+        { controls = options.controls
+        , init = \controls -> ( options.init controls, Effect.none )
+        , update = \controls msg model -> ( options.update controls msg model, Effect.none )
+        , view = options.view
+        , subscriptions = \_ _ -> Sub.none
         }
 
 
