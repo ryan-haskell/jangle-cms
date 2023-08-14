@@ -119,6 +119,7 @@ view (Input props) =
         Text ->
             input
                 [ Css.input
+                , Css.border
                 , Attr.autocomplete False
                 , Attr.value props.value
                 , onInputAttribute
@@ -142,6 +143,7 @@ view (Input props) =
                     ]
                 , input
                     [ Css.input
+                    , Css.border
                     , Attr.autocomplete False
                     , Css.padLeft_40
                     , Attr.value props.value
@@ -157,6 +159,7 @@ view (Input props) =
         Multiline ->
             textarea
                 [ Css.textarea
+                , Css.border
                 , Attr.autocomplete False
                 , Attr.rows 5
                 , Attr.value props.value
