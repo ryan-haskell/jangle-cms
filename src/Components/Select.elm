@@ -272,7 +272,7 @@ cycleThroughOptions { props, offset, numberOfChoices } =
         newIndex : Int
         newIndex =
             (model.menuSelectedIndex + offset)
-                |> Basics.remainderBy numberOfChoices
+                |> Basics.modBy numberOfChoices
     in
     ( { model | menuSelectedIndex = newIndex }
         |> Model
