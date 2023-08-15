@@ -40,6 +40,7 @@ type Icon
     | Search
     | SignOut
     | Switch
+    | Handle
 
 
 type Size
@@ -475,6 +476,34 @@ view size icon =
                         ]
                         [ path
                             [ Attr.d "M7.72 21.78a.75.75 0 0 0 1.06-1.06L5.56 17.5h14.69a.75.75 0 0 0 0-1.5H5.56l3.22-3.22a.75.75 0 1 0-1.06-1.06l-4.5 4.5a.75.75 0 0 0 0 1.06l4.5 4.5Zm8.56-9.5a.75.75 0 1 1-1.06-1.06L18.44 8H3.75a.75.75 0 0 1 0-1.5h14.69l-3.22-3.22a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5Z"
+                            , Attr.fill "currentColor"
+                            ]
+                            []
+                        ]
+
+                ( Handle, Px16 ) ->
+                    svg
+                        [ Attr.width "16"
+                        , Attr.height "16"
+                        , Attr.viewBox "0 0 16 16"
+                        , Attr.fill "none"
+                        ]
+                        [ path
+                            [ Attr.d "M10 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm5-9a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"
+                            , Attr.fill "currentColor"
+                            ]
+                            []
+                        ]
+
+                ( Handle, Px24 ) ->
+                    svg
+                        [ Attr.width "24"
+                        , Attr.height "24"
+                        , Attr.viewBox "0 0 24 24"
+                        , Attr.fill "none"
+                        ]
+                        [ path
+                            [ Attr.d "M9 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm7-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 18a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"
                             , Attr.fill "currentColor"
                             ]
                             []

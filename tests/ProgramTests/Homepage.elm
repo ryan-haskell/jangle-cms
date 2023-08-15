@@ -14,17 +14,34 @@ import Tests.Page
 
 
 
--- DESCRIBE HOMEPAGE
+-- PROGRAM TESTS
 
 
-newPageTest : ProgramTest Model Msg (Effect Msg)
-newPageTest =
+start : ProgramTest Model Msg (Effect Msg)
+start =
     Tests.Page.toAuthenticatedProgramTest
         { page = Pages.Home_.page
         , url = "https://app.jangle.io"
         , params = ()
         , flags = Json.Encode.null
         }
+
+
+startWithNoExistingProjects : ProgramTest Model Msg (Effect Msg)
+startWithNoExistingProjects =
+    start
+        |> Tests.Page.sendMsg (fetchedExistingProjects [])
+
+
+startWithExistingProjects : ProgramTest Model Msg (Effect Msg)
+startWithExistingProjects =
+    start
+        |> Tests.Page.sendMsg
+            (fetchedExistingProjects
+                [ "@jangle-cms/app"
+                , "@ryannhg/rhg_dev"
+                ]
+            )
 
 
 
@@ -36,55 +53,37 @@ suite =
     Test.describe "Homepage"
         [ Test.test "Page shows loading message while fetching existing projects" <|
             \() ->
-                newPageTest
+                start
                     |> ProgramTest.expectViewHas
                         [ Selector.text "Loading..."
                         ]
-        , let
-            start : ProgramTest Model Msg (Effect Msg)
-            start =
-                newPageTest
-                    |> Tests.Page.sendMsg
-                        (fetchedExistingProjects
-                            []
-                        )
-          in
-          Test.describe "When there are no existing projects"
+        , Test.describe "When there are no existing projects"
             [ Test.test "Show 'Create new project'" <|
                 \() ->
-                    start
+                    startWithNoExistingProjects
                         |> ProgramTest.expectViewHas
                             [ Selector.text "Create new project"
                             ]
             ]
-        , let
-            start : ProgramTest Model Msg (Effect Msg)
-            start =
-                newPageTest
-                    |> Tests.Page.sendMsg
-                        (fetchedExistingProjects
-                            [ "@jangle-cms/app"
-                            , "@ryannhg/rhg_dev"
-                            ]
-                        )
-          in
-          Test.describe "When there are existing projects"
+        , Test.describe "When there are existing projects"
             [ Test.test "Show existing projects as links" <|
                 \() ->
-                    start
+                    startWithExistingProjects
                         |> ProgramTest.expectViewHas
                             [ Selector.text "@jangle-cms/app"
                             ]
-            , Test.test
-                "Show 'Create another project' button"
-              <|
+            , Test.test "Show 'Create another project' button" <|
                 \() ->
-                    start
+                    startWithExistingProjects
                         |> ProgramTest.expectViewHas
                             [ Selector.text "Create another project"
                             ]
             ]
         ]
+
+
+
+-- MSGS
 
 
 fetchedExistingProjects : List String -> Pages.Home_.Msg

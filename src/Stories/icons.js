@@ -9,7 +9,9 @@ export const icons = [
   'Right',
   'Close',
   'Search',
-  'SignOut'
+  'SignOut',
+  'Switch',
+  'Handle'
 ]
 
 export default {}

@@ -1,5 +1,7 @@
 import * as ErrorReporting from './interop/error-reporting.js'
 import * as BoundingClientRect from './interop/bounding-client-rect.js'
+// Web components
+import * as DragNDrop from './interop/web-components/drag-n-drop.js'
 
 // Helper for working with localStorage and JSON values
 const Storage = {
@@ -11,8 +13,12 @@ const Storage = {
 // This returns the flags passed into your Elm application
 // 
 export const flags = async ({ env }) => {
+
   BoundingClientRect.init()
   ErrorReporting.init({ env })
+
+  // Web components
+  DragNDrop.init()
 
   return {
     env,

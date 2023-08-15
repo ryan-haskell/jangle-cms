@@ -26,6 +26,8 @@ iconOptions =
     , ( "Close", Components.Icon.Close )
     , ( "Search", Components.Icon.Search )
     , ( "SignOut", Components.Icon.SignOut )
+    , ( "Switch", Components.Icon.Switch )
+    , ( "Handle", Components.Icon.Handle )
     ]
 
 

@@ -308,6 +308,7 @@ dialog::backdrop {
 
 .gap_fill { justify-content: space-between; }
 
+.pad_4 { padding: var(--px_4); }
 .pad_8 { padding: var(--px_8); }
 .pad_12 { padding: var(--px_12); }
 .pad_16 { padding: var(--px_16); }
@@ -496,12 +497,8 @@ dialog::backdrop {
   animation-delay: -0.15s;
 }
 @keyframes spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 input[type = 'search']::-webkit-search-cancel-button {
@@ -529,4 +526,15 @@ input[type = 'search']::-webkit-search-cancel-button {
 .popover_choice__list:not(:hover) .popover_choice--selected {
   background-color: var(--button_secondaryBgHover);
   border-left: solid 4px var(--color_primary);
+}
+
+/* DRAGGABLE */
+.draggable-mirror {
+  border: solid 1px var(--color_border);
+}
+.draggable-mirror *[draggable-handle] {
+  background-color: var(--button_secondaryBgHover);
+}
+.draggable--over {
+  background-color: var(--button_secondaryBgActive);
 }

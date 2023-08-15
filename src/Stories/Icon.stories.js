@@ -56,3 +56,9 @@ export const Search = {
 export const SignOut = {
   args: { icon: 'SignOut', size: '24px' },
 }
+export const Switch = {
+  args: { icon: 'Switch', size: '24px' },
+}
+export const Handle = {
+  args: { icon: 'Handle', size: '24px' },
+}

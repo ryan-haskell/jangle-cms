@@ -43,6 +43,7 @@
     "vite-plugin-elm": "2.9.0-beta.1"
   },
   "dependencies": {
-    "@sentry/browser": "7.60.0"
+    "@sentry/browser": "7.60.0",
+    "@shopify/draggable": "1.0.0-beta.8"
   }
 }
