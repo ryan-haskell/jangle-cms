@@ -8,7 +8,6 @@ export const init = () => {
 
   window.customElements.define(name, class extends HTMLElement {
     connectedCallback() {
-      console.log(`Hello, from ${name}`)
       let sortable = new Sortable(
         this.parentNode.querySelectorAll('*[draggable-parent]'),
         {
